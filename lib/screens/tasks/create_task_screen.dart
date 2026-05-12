@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/theme.dart';
+import '../../models/app_location.dart';
 import '../../models/user_role.dart';
 import '../../models/volunteer.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/task_service.dart';
 import '../../services/volunteer_service.dart';
 import '../../widgets/animations.dart';
+import '../../widgets/location_picker.dart';
 
 class CreateTaskScreen extends StatefulWidget {
   const CreateTaskScreen({super.key});
@@ -22,7 +24,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   final VolunteerService _volunteerService = VolunteerService();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final _locationController = TextEditingController();
+  AppLocation? _location;
   DateTime _date = DateTime.now();
   final List<String> _requiredSkills = [];
   final List<String> _selectedVolunteerIds = [];
@@ -41,7 +43,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
-    _locationController.dispose();
     super.dispose();
   }
 
@@ -57,6 +58,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
           role == UserRole.admin || role == UserRole.support;
       final list = await _volunteerService.getVolunteers(
         coordinatorDirectory: coordinator,
+        originLat: _location?.latitude,
+        originLon: _location?.longitude,
       );
       final assignable = coordinator
           ? list
@@ -94,6 +97,16 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_location == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Pick a location from the list'),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      return;
+    }
     if (_requiredSkills.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -109,7 +122,10 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       final task = await _taskService.createTask(
         title: _titleController.text.trim(),
         description: _descriptionController.text.trim(),
-        location: _locationController.text.trim(),
+        location: _location!.name,
+        locationId: _location!.id,
+        latitude: _location!.latitude,
+        longitude: _location!.longitude,
         requiredSkills: _requiredSkills,
         date: _date,
       );
@@ -245,14 +261,16 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _locationController,
-                        decoration: const InputDecoration(
-                          labelText: 'Location',
-                          prefixIcon: Icon(Icons.place_rounded),
-                        ),
-                        validator: (v) =>
-                            v == null || v.trim().isEmpty ? 'Required' : null,
+                      LocationPicker(
+                        selectedId: _location?.id,
+                        label: 'Location',
+                        hint: 'Pick a location',
+                        onChanged: (loc) {
+                          setState(() => _location = loc);
+                          if (loc?.latitude != null) {
+                            _loadVolunteers();
+                          }
+                        },
                       ),
                       const SizedBox(height: 12),
                       Material(
@@ -352,6 +370,14 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                             color: AppTheme.textPrimary,
                           ),
                     ),
+                    const SizedBox(width: 8),
+                    if (_location?.latitude != null)
+                      const Chip(
+                        label: Text('Closest first',
+                            style: TextStyle(fontSize: 11)),
+                        backgroundColor: Color(0xFFE0F2FE),
+                        labelStyle: TextStyle(color: AppTheme.primary),
+                      ),
                     const Spacer(),
                     if (_volunteersLoading)
                       const SizedBox(
@@ -462,17 +488,46 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      v.fullName.isNotEmpty
-                                          ? v.fullName
-                                          : v.email,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 15,
-                                      ),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            v.fullName.isNotEmpty
+                                                ? v.fullName
+                                                : v.email,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 15,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        if (v.isOnline)
+                                          Container(
+                                            width: 8,
+                                            height: 8,
+                                            margin:
+                                                const EdgeInsets.only(left: 6),
+                                            decoration: const BoxDecoration(
+                                              color: AppTheme.success,
+                                              shape: BoxShape.circle,
+                                            ),
+                                          ),
+                                        if (v.distanceKm != null) ...[
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            '${v.distanceKm!.toStringAsFixed(1)} km',
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700,
+                                              color: AppTheme.primary,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
                                     ),
                                     Text(
-                                      '${v.city} • ${v.skills.take(3).join(', ')}${v.skills.length > 3 ? '…' : ''}',
+                                      '${v.currentLocationName ?? v.city} • ${v.skills.take(3).join(', ')}${v.skills.length > 3 ? '…' : ''}',
                                       style: const TextStyle(
                                         fontSize: 12,
                                         color: AppTheme.textSecondary,

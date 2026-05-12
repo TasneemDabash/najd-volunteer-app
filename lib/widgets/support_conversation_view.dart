@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../config/theme.dart';
 import '../services/support_message_service.dart';
+import '../services/voice_message_service.dart';
+import 'voice_message_widgets.dart';
 
 /// Shared volunteer / coordinator support thread UI with Realtime inserts.
 class SupportConversationView extends StatefulWidget {
@@ -24,12 +28,14 @@ class SupportConversationView extends StatefulWidget {
 
 class _SupportConversationViewState extends State<SupportConversationView> {
   final _service = SupportMessageService();
+  final _voice = VoiceMessageService();
   final _scroll = ScrollController();
   final _input = TextEditingController();
   final List<SupportChatMessage> _messages = [];
   RealtimeChannel? _channel;
   bool _loading = true;
   bool _sending = false;
+  bool _voiceUploading = false;
   String? _error;
 
   @override
@@ -136,6 +142,33 @@ class _SupportConversationViewState extends State<SupportConversationView> {
       }
     } finally {
       if (mounted) setState(() => _sending = false);
+    }
+  }
+
+  Future<void> _sendVoice(File file, int durationMs) async {
+    setState(() => _voiceUploading = true);
+    try {
+      if (widget.isCoordinator) {
+        await _voice.replyVolunteerVoice(
+          volunteerUserId: widget.threadVolunteerId,
+          file: file,
+          durationMs: durationMs,
+        );
+      } else {
+        await _voice.submitVolunteerVoice(file: file, durationMs: durationMs);
+      }
+      await _load();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Voice send failed: $e'),
+            backgroundColor: AppTheme.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _voiceUploading = false);
     }
   }
 
@@ -258,6 +291,11 @@ class _SupportConversationViewState extends State<SupportConversationView> {
                   ),
                 ),
                 const SizedBox(width: 8),
+                VoiceRecorderButton(
+                  disabled: _sending || _voiceUploading,
+                  onRecorded: _sendVoice,
+                ),
+                const SizedBox(width: 8),
                 Material(
                   color: AppTheme.primary,
                   borderRadius: BorderRadius.circular(24),
@@ -268,7 +306,7 @@ class _SupportConversationViewState extends State<SupportConversationView> {
                       width: 48,
                       height: 48,
                       child: Center(
-                        child: _sending
+                        child: _sending || _voiceUploading
                             ? const SizedBox(
                                 width: 22,
                                 height: 22,
@@ -337,14 +375,22 @@ class _Bubble extends StatelessWidget {
           crossAxisAlignment:
               alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            Text(
-              message.body,
-              style: TextStyle(
-                color: alignEnd ? Colors.white : AppTheme.textPrimary,
-                fontSize: 15,
-                height: 1.35,
+            if (message.isVoice)
+              VoiceMessagePlayer(
+                url: message.mediaUrl!,
+                durationMs: message.durationMs,
+                tint: alignEnd ? Colors.white : AppTheme.primary,
+                onTint: alignEnd ? AppTheme.primary : Colors.white,
+              )
+            else
+              Text(
+                message.body,
+                style: TextStyle(
+                  color: alignEnd ? Colors.white : AppTheme.textPrimary,
+                  fontSize: 15,
+                  height: 1.35,
+                ),
               ),
-            ),
             const SizedBox(height: 4),
             Text(
               time,

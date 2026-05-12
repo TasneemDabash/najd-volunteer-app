@@ -82,6 +82,9 @@ class SupportChatMessage {
     required this.threadVolunteerId,
     required this.senderId,
     required this.body,
+    this.mediaType,
+    this.mediaUrl,
+    this.durationMs,
     required this.createdAt,
   });
 
@@ -89,7 +92,12 @@ class SupportChatMessage {
   final String threadVolunteerId;
   final String senderId;
   final String body;
+  final String? mediaType;
+  final String? mediaUrl;
+  final int? durationMs;
   final DateTime createdAt;
+
+  bool get isVoice => (mediaType == 'audio') && (mediaUrl?.isNotEmpty ?? false);
 
   factory SupportChatMessage.fromJson(Map<String, dynamic> json) {
     return SupportChatMessage(
@@ -97,6 +105,13 @@ class SupportChatMessage {
       threadVolunteerId: json['thread_volunteer_id'] as String? ?? '',
       senderId: json['sender_id'] as String? ?? '',
       body: json['body'] as String? ?? '',
+      mediaType: json['media_type'] as String?,
+      mediaUrl: json['media_url'] as String?,
+      durationMs: json['duration_ms'] is int
+          ? json['duration_ms'] as int
+          : (json['duration_ms'] is num
+              ? (json['duration_ms'] as num).toInt()
+              : null),
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : DateTime.now(),

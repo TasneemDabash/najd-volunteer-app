@@ -30,7 +30,6 @@ class RoleBasedRoot extends StatelessWidget {
           case UserRole.admin:
             return const AdminLayout();
           case UserRole.volunteer:
-          default:
             return const VolunteerLayout();
         }
       },

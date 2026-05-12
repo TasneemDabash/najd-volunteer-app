@@ -9,6 +9,8 @@ import '../contact_support_screen.dart';
 import '../my_profile_screen.dart';
 import '../notifications_screen.dart';
 import '../settings_screen.dart';
+import '../tasks/volunteer_tasks_screen.dart';
+import '../volunteers/my_availability_screen.dart';
 
 class VolunteerLayout extends StatefulWidget {
   const VolunteerLayout({super.key});
@@ -34,8 +36,8 @@ class _VolunteerLayoutState extends State<VolunteerLayout> {
         onNavigateToTab: (i) => setState(() => _index = i),
         greeting: _getGreeting(),
       ),
-      const _VolunteerTasksScreen(),
-      const _VolunteerAvailabilityScreen(),
+      const VolunteerTasksScreen(),
+      const MyAvailabilityScreen(),
       const ContactSupportScreen(),
       const MyProfileScreen(),
     ];
@@ -713,68 +715,3 @@ class _QuickActionCardState extends State<_QuickActionCard> {
   }
 }
 
-class _VolunteerTasksScreen extends StatelessWidget {
-  const _VolunteerTasksScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.background,
-      appBar: AppBar(
-        title: const Text('My Tasks'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: AppTheme.secondary.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.assignment_outlined,
-                  size: 64,
-                  color: AppTheme.secondary,
-                ),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'No Tasks Yet',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Your assigned tasks will appear here.\nCheck back later!',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 15,
-                  color: AppTheme.textSecondary,
-                  height: 1.5,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _VolunteerAvailabilityScreen extends StatelessWidget {
-  const _VolunteerAvailabilityScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    return const MyProfileScreen();
-  }
-}

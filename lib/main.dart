@@ -9,6 +9,7 @@ import 'screens/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/signup_screen.dart';
 import 'screens/role_based_root.dart';
+import 'widgets/incoming_call_listener.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -68,7 +69,7 @@ class AuthWrapper extends StatelessWidget {
         if (auth.user == null) {
           return const LoginScreen();
         }
-        return const RoleBasedRoot();
+        return const IncomingCallListener(child: RoleBasedRoot());
       },
     );
   }

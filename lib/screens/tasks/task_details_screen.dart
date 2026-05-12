@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+
+import '../../config/theme.dart';
 import '../../models/task_model.dart';
+import '../../models/user_role.dart';
 import '../../models/volunteer.dart';
+import '../../providers/auth_provider.dart';
 import '../../services/task_service.dart';
+import '../../services/volunteer_service.dart';
+import '../../widgets/animations.dart';
 import '../volunteers/volunteer_profile_screen.dart';
 
 class TaskDetailsScreen extends StatefulWidget {
@@ -16,6 +23,7 @@ class TaskDetailsScreen extends StatefulWidget {
 
 class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
   final TaskService _service = TaskService();
+  final VolunteerService _volunteerService = VolunteerService();
   TaskModel? _task;
   List<Volunteer> _assigned = [];
   bool _loading = true;
@@ -41,10 +49,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
         });
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Error: $e')));
-      }
+      if (mounted) _showError(e);
     }
     if (mounted) setState(() => _loading = false);
   }
@@ -55,10 +60,257 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
       await _service.updateTaskStatus(_task!.id, status);
       if (mounted) setState(() => _task = _task!.copyWith(status: status));
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Error: $e')));
-      }
+      if (mounted) _showError(e);
+    }
+  }
+
+  Future<void> _openAssignSheet({required UserRole role}) async {
+    if (_task == null) return;
+    final originLat = _task!.latitude;
+    final originLon = _task!.longitude;
+    final all = await _volunteerService.getVolunteers(
+      coordinatorDirectory: true,
+      originLat: originLat,
+      originLon: originLon,
+    );
+    final volunteers = all
+        .where((v) =>
+            (v.appRole?.toLowerCase() ?? 'volunteer') == 'volunteer' &&
+            (v.status?.toLowerCase() ?? 'active') == 'active')
+        .toList();
+    if (!mounted) return;
+
+    final currentlyAssigned = _assigned.map((v) => v.id).toSet();
+    final selected = Set<String>.from(currentlyAssigned);
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) {
+        return StatefulBuilder(
+          builder: (sheetCtx, setSheetState) {
+            return DraggableScrollableSheet(
+              expand: false,
+              initialChildSize: 0.75,
+              maxChildSize: 0.95,
+              minChildSize: 0.4,
+              builder: (context, scrollController) {
+                return Container(
+                  decoration: const BoxDecoration(
+                    color: AppTheme.surface,
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(24)),
+                  ),
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: AppTheme.textLight.withOpacity(0.4),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Row(
+                        children: [
+                          const Icon(Icons.person_add_alt_1_rounded,
+                              color: AppTheme.primary),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Assign volunteers',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const Spacer(),
+                          if (originLat != null && originLon != null)
+                            const Chip(
+                              label: Text('Closest first',
+                                  style: TextStyle(fontSize: 11)),
+                              backgroundColor: Color(0xFFE0F2FE),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Pick volunteers to assign. They will receive an in-app notification.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.textSecondary,
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Expanded(
+                        child: volunteers.isEmpty
+                            ? const Center(
+                                child: Text('No volunteers available.'),
+                              )
+                            : ListView.builder(
+                                controller: scrollController,
+                                itemCount: volunteers.length,
+                                itemBuilder: (context, index) {
+                                  final v = volunteers[index];
+                                  final isSelected = selected.contains(v.id);
+                                  return CheckboxListTile(
+                                    value: isSelected,
+                                    onChanged: (val) {
+                                      setSheetState(() {
+                                        if (val == true) {
+                                          selected.add(v.id);
+                                        } else {
+                                          selected.remove(v.id);
+                                        }
+                                      });
+                                    },
+                                    title: Text(v.fullName.isNotEmpty
+                                        ? v.fullName
+                                        : v.email),
+                                    subtitle: Wrap(
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.center,
+                                      spacing: 6,
+                                      children: [
+                                        Text(v.currentLocationName ?? v.city,
+                                            style: const TextStyle(
+                                                fontSize: 12)),
+                                        if (v.distanceKm != null) ...[
+                                          const Text('·',
+                                              style: TextStyle(fontSize: 12)),
+                                          Text(
+                                            '${v.distanceKm!.toStringAsFixed(1)} km',
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              color: AppTheme.primary,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                        if (v.isOnline) ...[
+                                          const Text('·',
+                                              style: TextStyle(fontSize: 12)),
+                                          const Text(
+                                            'Online',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: AppTheme.success,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                        if (!v.isAvailable) ...[
+                                          const Text('·',
+                                              style: TextStyle(fontSize: 12)),
+                                          const Text(
+                                            'Busy',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: AppTheme.warning,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                    secondary: CircleAvatar(
+                                      backgroundColor:
+                                          AppTheme.secondary.withOpacity(0.15),
+                                      child: Text(
+                                        v.fullName.isNotEmpty
+                                            ? v.fullName[0].toUpperCase()
+                                            : '?',
+                                        style: const TextStyle(
+                                          color: AppTheme.secondary,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                      ),
+                      SafeArea(
+                        top: false,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextButton(
+                                onPressed: () => Navigator.pop(sheetCtx),
+                                child: const Text('Cancel'),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: FilledButton.icon(
+                                onPressed: () async {
+                                  try {
+                                    await _service.assignVolunteers(
+                                      _task!.id,
+                                      selected.toList(),
+                                    );
+                                    if (sheetCtx.mounted) {
+                                      Navigator.pop(sheetCtx);
+                                    }
+                                    if (mounted) {
+                                      await _load();
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Assignment updated'),
+                                          backgroundColor: AppTheme.success,
+                                          behavior: SnackBarBehavior.floating,
+                                        ),
+                                      );
+                                    }
+                                  } catch (e) {
+                                    if (mounted) _showError(e);
+                                  }
+                                },
+                                icon: const Icon(Icons.check_rounded),
+                                label: Text(
+                                  role == UserRole.support
+                                      ? 'Save'
+                                      : 'Save (${selected.length})',
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showError(Object e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error: $e'),
+        backgroundColor: AppTheme.error,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
+  Color _statusColor(TaskStatus s) {
+    switch (s) {
+      case TaskStatus.completed:
+        return AppTheme.success;
+      case TaskStatus.active:
+        return AppTheme.warning;
+      case TaskStatus.pending:
+        return AppTheme.textLight;
     }
   }
 
@@ -77,77 +329,162 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
       );
     }
     final task = _task!;
-    final statusColor = task.status == TaskStatus.completed
-        ? Colors.teal
-        : task.status == TaskStatus.active
-            ? Colors.orange
-            : Colors.grey;
+    final role = context.watch<AuthProvider>().role;
+    final isCoordinator = role == UserRole.admin || role == UserRole.support;
+    final statusColor = _statusColor(task.status);
+
     return Scaffold(
+      backgroundColor: AppTheme.background,
       appBar: AppBar(
         title: const Text('Task Details'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         actions: [
           if (task.status != TaskStatus.completed)
             PopupMenuButton<TaskStatus>(
+              tooltip: 'Update status',
+              icon: const Icon(Icons.more_vert_rounded),
               onSelected: _updateStatus,
               itemBuilder: (context) => [
                 if (task.status != TaskStatus.active)
                   const PopupMenuItem(
-                      value: TaskStatus.active, child: Text('Mark Active')),
+                    value: TaskStatus.active,
+                    child: ListTile(
+                      leading: Icon(Icons.play_arrow_rounded,
+                          color: AppTheme.warning),
+                      title: Text('Mark active'),
+                    ),
+                  ),
                 const PopupMenuItem(
-                    value: TaskStatus.completed, child: Text('Mark Completed')),
+                  value: TaskStatus.completed,
+                  child: ListTile(
+                    leading: Icon(Icons.check_circle_rounded,
+                        color: AppTheme.success),
+                    title: Text('Mark completed'),
+                  ),
+                ),
+                if (isCoordinator && task.status != TaskStatus.pending)
+                  const PopupMenuItem(
+                    value: TaskStatus.pending,
+                    child: ListTile(
+                      leading: Icon(Icons.refresh, color: AppTheme.textLight),
+                      title: Text('Mark pending'),
+                    ),
+                  ),
               ],
             ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+      body: RefreshIndicator(
+        onRefresh: _load,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
           children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
+            SlideInAnimation(
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppTheme.surface,
+                  borderRadius: BorderRadius.circular(22),
+                  boxShadow: AppTheme.cardShadow,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
                         Expanded(
-                            child: Text(task.title,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headlineSmall
-                                    ?.copyWith(fontWeight: FontWeight.bold))),
-                        Chip(
-                            label: Text(task.status.displayName),
-                            backgroundColor: statusColor.withOpacity(0.2)),
+                          child: Text(
+                            task.title,
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.textPrimary,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: statusColor.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            task.status.displayName,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: statusColor,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 12),
-                    Text(task.description),
-                    const SizedBox(height: 12),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.location_on),
-                      title: const Text('Location'),
-                      subtitle: Text(task.location),
+                    if (task.description.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        task.description,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppTheme.textSecondary,
+                          height: 1.45,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 16),
+                    _MetaRow(
+                      icon: Icons.place_rounded,
+                      label: 'Location',
+                      value: task.displayLocation.isEmpty
+                          ? 'Not set'
+                          : task.displayLocation,
                     ),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.calendar_today),
-                      title: const Text('Date'),
-                      subtitle:
-                          Text(DateFormat.yMMMd().add_jm().format(task.date)),
+                    _MetaRow(
+                      icon: Icons.event_rounded,
+                      label: 'Scheduled',
+                      value: DateFormat.yMMMMd().add_jm().format(task.date),
                     ),
+                    if (task.latitude != null && task.longitude != null)
+                      _MetaRow(
+                        icon: Icons.gps_fixed_rounded,
+                        label: 'Coordinates',
+                        value:
+                            '${task.latitude!.toStringAsFixed(4)}, ${task.longitude!.toStringAsFixed(4)}',
+                      ),
                     if (task.requiredSkills.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      const Text('Required Skills'),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Required skills',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textLight,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
                       Wrap(
                         spacing: 6,
                         runSpacing: 6,
                         children: task.requiredSkills
-                            .map((s) => Chip(label: Text(s)))
+                            .map(
+                              (s) => Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.surfaceLight,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  s,
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppTheme.primary,
+                                  ),
+                                ),
+                              ),
+                            )
                             .toList(),
                       ),
                     ],
@@ -155,36 +492,155 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-            Text('Assigned Volunteers (${_assigned.length})',
-                style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 22),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Assigned volunteers (${_assigned.length})',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                ),
+                if (isCoordinator)
+                  TextButton.icon(
+                    onPressed: () => _openAssignSheet(role: role),
+                    icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
+                    label: Text(_assigned.isEmpty ? 'Assign' : 'Edit'),
+                  ),
+              ],
+            ),
             const SizedBox(height: 8),
             if (_assigned.isEmpty)
-              const Card(
-                  child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Text('No volunteers assigned')))
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppTheme.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: AppTheme.cardShadow,
+                ),
+                child: const Text(
+                  'No volunteers assigned yet.',
+                  style: TextStyle(color: AppTheme.textSecondary),
+                ),
+              )
             else
-              ..._assigned.map((v) => Card(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    child: ListTile(
-                      leading: CircleAvatar(
-                          child: Text(v.fullName.isNotEmpty
-                              ? v.fullName[0].toUpperCase()
-                              : '?')),
-                      title: Text(v.fullName),
-                      subtitle: Text('${v.phone} • ${v.city}'),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) =>
-                                VolunteerProfileScreen(volunteerId: v.id)),
+              ..._assigned.map(
+                (v) => Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: AppTheme.cardShadow,
+                  ),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 8),
+                    leading: CircleAvatar(
+                      backgroundColor: AppTheme.secondary.withOpacity(0.15),
+                      child: Text(
+                        v.fullName.isNotEmpty
+                            ? v.fullName[0].toUpperCase()
+                            : '?',
+                        style: const TextStyle(
+                          color: AppTheme.secondary,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  )),
+                    title: Text(v.fullName.isNotEmpty ? v.fullName : v.email),
+                    subtitle: Row(
+                      children: [
+                        if (v.isOnline) ...[
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: AppTheme.success,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          const Text('Online',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppTheme.success,
+                                fontWeight: FontWeight.w600,
+                              )),
+                          const SizedBox(width: 8),
+                        ],
+                        Flexible(
+                          child: Text(
+                            '${v.phone} · ${v.currentLocationName ?? v.city}',
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            VolunteerProfileScreen(volunteerId: v.id),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _MetaRow extends StatelessWidget {
+  const _MetaRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: AppTheme.textLight),
+          const SizedBox(width: 10),
+          SizedBox(
+            width: 90,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textLight,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.textPrimary,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -9,7 +9,6 @@ import '../services/task_service.dart';
 import '../widgets/animations.dart';
 import '../widgets/app_card.dart';
 import 'volunteers/volunteer_list_screen.dart';
-import 'volunteers/add_volunteer_screen.dart';
 import 'tasks/task_list_screen.dart';
 import 'tasks/create_task_screen.dart';
 import 'notifications_screen.dart';
@@ -315,14 +314,15 @@ class _DashboardScreenState extends State<DashboardScreen>
                             children: [
                               Expanded(
                                 child: _QuickActionButton(
-                                  icon: Icons.person_add,
-                                  label: 'Add Volunteer',
+                                  icon: Icons.people_alt_rounded,
+                                  label: 'Browse Volunteers',
                                   gradient: AppTheme.primaryGradient,
                                   onTap: () => Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (_) =>
-                                            const AddVolunteerScreen()),
+                                      builder: (_) =>
+                                          const VolunteerListScreen(),
+                                    ),
                                   ).then((_) => _loadStats()),
                                 ),
                               ),

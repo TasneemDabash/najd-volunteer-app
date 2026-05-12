@@ -24,19 +24,21 @@ class TaskService {
     return query.order(orderColumn, ascending: false);
   }
 
-  /// Orders by `date` when the column exists; falls back to `created_at` (older DBs).
+  /// Orders by `date` when the column exists; falls back to `created_at`.
   Future<List<TaskModel>> getTasks({TaskStatus? status}) async {
     try {
-      final response = await _tasksQueryOrdered(status: status, orderColumn: 'date');
+      final response =
+          await _tasksQueryOrdered(status: status, orderColumn: 'date');
       return _mapTasks(response);
     } catch (e) {
       final msg = e.toString();
       if (msg.contains('PGRST204') ||
           msg.contains('42703') ||
           (msg.contains('date') &&
-              (msg.contains('does not exist') || msg.contains('schema cache')))) {
-        final response =
-            await _tasksQueryOrdered(status: status, orderColumn: 'created_at');
+              (msg.contains('does not exist') ||
+                  msg.contains('schema cache')))) {
+        final response = await _tasksQueryOrdered(
+            status: status, orderColumn: 'created_at');
         return _mapTasks(response);
       }
       rethrow;
@@ -61,6 +63,9 @@ class TaskService {
     required String title,
     required String description,
     required String location,
+    String? locationId,
+    double? latitude,
+    double? longitude,
     required List<String> requiredSkills,
     required DateTime date,
     required TaskStatus status,
@@ -68,11 +73,16 @@ class TaskService {
     bool includeLocation = true,
     bool includeDescription = true,
     bool includeRequiredSkills = true,
+    bool includeLocationId = true,
+    bool includeCoordinates = true,
   }) {
     return {
       'title': title,
       if (includeDescription) 'description': description,
       if (includeLocation) 'location': location,
+      if (includeLocationId && locationId != null) 'location_id': locationId,
+      if (includeCoordinates && latitude != null) 'latitude': latitude,
+      if (includeCoordinates && longitude != null) 'longitude': longitude,
       if (includeRequiredSkills) 'required_skills': requiredSkills,
       'status': status.name,
       if (includeDate) 'date': date.toIso8601String(),
@@ -83,6 +93,9 @@ class TaskService {
     required String title,
     required String description,
     required String location,
+    String? locationId,
+    double? latitude,
+    double? longitude,
     required List<String> requiredSkills,
     required DateTime date,
     TaskStatus status = TaskStatus.pending,
@@ -92,9 +105,37 @@ class TaskService {
         title: title,
         description: description,
         location: location,
+        locationId: locationId,
+        latitude: latitude,
+        longitude: longitude,
         requiredSkills: requiredSkills,
         date: date,
         status: status,
+      ),
+      _createPayload(
+        title: title,
+        description: description,
+        location: location,
+        locationId: locationId,
+        latitude: latitude,
+        longitude: longitude,
+        requiredSkills: requiredSkills,
+        date: date,
+        status: status,
+        includeCoordinates: false,
+      ),
+      _createPayload(
+        title: title,
+        description: description,
+        location: location,
+        locationId: locationId,
+        latitude: latitude,
+        longitude: longitude,
+        requiredSkills: requiredSkills,
+        date: date,
+        status: status,
+        includeLocationId: false,
+        includeCoordinates: false,
       ),
       _createPayload(
         title: title,
@@ -104,27 +145,8 @@ class TaskService {
         date: date,
         status: status,
         includeDate: false,
-      ),
-      _createPayload(
-        title: title,
-        description: description,
-        location: location,
-        requiredSkills: requiredSkills,
-        date: date,
-        status: status,
-        includeDate: false,
-        includeLocation: false,
-      ),
-      _createPayload(
-        title: title,
-        description: description,
-        location: location,
-        requiredSkills: requiredSkills,
-        date: date,
-        status: status,
-        includeDate: false,
-        includeLocation: false,
-        includeDescription: false,
+        includeLocationId: false,
+        includeCoordinates: false,
       ),
       {
         'title': title,
@@ -157,11 +179,18 @@ class TaskService {
     bool includeLocation = true,
     bool includeDescription = true,
     bool includeRequiredSkills = true,
+    bool includeLocationId = true,
+    bool includeCoordinates = true,
   }) {
     return {
       'title': task.title,
       if (includeDescription) 'description': task.description,
       if (includeLocation) 'location': task.location,
+      if (includeLocationId && task.locationId != null)
+        'location_id': task.locationId,
+      if (includeCoordinates && task.latitude != null) 'latitude': task.latitude,
+      if (includeCoordinates && task.longitude != null)
+        'longitude': task.longitude,
       if (includeRequiredSkills) 'required_skills': task.requiredSkills,
       'status': task.status.name,
       if (includeDate) 'date': task.date.toIso8601String(),
@@ -171,13 +200,24 @@ class TaskService {
   Future<TaskModel> updateTask(TaskModel task) async {
     final attempts = <Map<String, dynamic>>[
       _updatePayload(task),
-      _updatePayload(task, includeDate: false),
-      _updatePayload(task, includeDate: false, includeLocation: false),
+      _updatePayload(task, includeCoordinates: false),
+      _updatePayload(task, includeLocationId: false, includeCoordinates: false),
+      _updatePayload(task,
+          includeDate: false,
+          includeLocationId: false,
+          includeCoordinates: false),
+      _updatePayload(task,
+          includeDate: false,
+          includeLocation: false,
+          includeLocationId: false,
+          includeCoordinates: false),
       _updatePayload(
         task,
         includeDate: false,
         includeLocation: false,
         includeDescription: false,
+        includeLocationId: false,
+        includeCoordinates: false,
       ),
       {
         'title': task.title,
@@ -220,10 +260,9 @@ class TaskService {
         .from(_assignmentsTable)
         .select('volunteer_id')
         .eq('task_id', taskId);
-    if (assignments.isEmpty) return [];
-    final ids = (assignments as List)
-        .map((e) => (e as Map)['volunteer_id'] as String)
-        .toList();
+    if ((assignments as List).isEmpty) return [];
+    final ids =
+        assignments.map((e) => (e as Map)['volunteer_id'] as String).toList();
     final volunteers =
         await _client.from('profiles').select().inFilter('id', ids);
     return (volunteers as List)
@@ -231,6 +270,8 @@ class TaskService {
         .toList();
   }
 
+  /// Replace assignment set. Insert triggers `trg_notify_volunteer_on_assignment`
+  /// so volunteers automatically receive an in-app notification.
   Future<void> assignVolunteers(
       String taskId, List<String> volunteerIds) async {
     await _client.from(_assignmentsTable).delete().eq('task_id', taskId);
@@ -239,6 +280,23 @@ class TaskService {
         .map((vId) => {'task_id': taskId, 'volunteer_id': vId})
         .toList();
     await _client.from(_assignmentsTable).insert(rows);
+  }
+
+  /// Add a single volunteer (kept separate so we can call from "assign more"
+  /// flows without rebuilding the whole assignment set).
+  Future<void> addVolunteerAssignment(String taskId, String volunteerId) async {
+    await _client
+        .from(_assignmentsTable)
+        .upsert({'task_id': taskId, 'volunteer_id': volunteerId});
+  }
+
+  Future<void> removeVolunteerAssignment(
+      String taskId, String volunteerId) async {
+    await _client
+        .from(_assignmentsTable)
+        .delete()
+        .eq('task_id', taskId)
+        .eq('volunteer_id', volunteerId);
   }
 
   Future<int> getActiveTasksCount() async {
@@ -253,5 +311,33 @@ class TaskService {
     final response =
         await _client.from(_tasksTable).select('id').eq('status', 'completed');
     return (response as List).length;
+  }
+
+  /// Tasks currently assigned to the signed-in volunteer. Uses the
+  /// `list_my_assigned_tasks` RPC (joins location for display). Falls back to a
+  /// direct join in case the RPC is missing.
+  Future<List<TaskModel>> getMyAssignedTasks() async {
+    try {
+      final response = await _client.rpc('list_my_assigned_tasks');
+      if (response == null) return [];
+      return (response as List)
+          .map((e) => TaskModel.fromJson(Map<String, dynamic>.from(e as Map)))
+          .toList();
+    } catch (_) {
+      final me = _client.auth.currentUser?.id;
+      if (me == null) return [];
+      final response = await _client
+          .from(_assignmentsTable)
+          .select('task:tasks(*)')
+          .eq('volunteer_id', me);
+      return (response as List)
+          .map((e) {
+            final task = (e as Map)['task'];
+            if (task == null) return null;
+            return TaskModel.fromJson(Map<String, dynamic>.from(task as Map));
+          })
+          .whereType<TaskModel>()
+          .toList();
+    }
   }
 }
