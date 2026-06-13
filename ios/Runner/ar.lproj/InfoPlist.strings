@@ -1,0 +1,11 @@
+/* Arabic localization for iOS privacy descriptions */
+
+"NSCameraUsageDescription" = "يستخدم نجد الكاميرا لمكالمات الفيديو بين المتطوعين وفريق الدعم.";
+"NSMicrophoneUsageDescription" = "يستخدم نجد الميكروفون للرسائل الصوتية ومكالمات الصوت والفيديو.";
+"NSLocationWhenInUseUsageDescription" = "يستخدم نجد موقعك لمطابقتك مع المهام والحوادث القريبة.";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "يستخدم نجد موقعك لمطابقتك مع المهام والحوادث القريبة.";
+"NSPhotoLibraryUsageDescription" = "يحتاج نجد الوصول لمكتبة الصور لمشاركة صور متعلقة بالمهام.";
+"NSPhotoLibraryAddUsageDescription" = "يحتاج نجد إذن لحفظ الصور في مكتبتك.";
+"NSContactsUsageDescription" = "قد يصل نجد إلى جهات الاتصال لمساعدتك في دعوة متطوعين آخرين.";
+"NSUserTrackingUsageDescription" = "نستخدم هذا لتحسين تجربتك وعرض محتوى مناسب.";
+"CFBundleDisplayName" = "نجد";

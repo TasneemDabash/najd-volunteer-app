@@ -89,6 +89,83 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  String _formatError(dynamic e) {
+    final errorStr = e.toString().toLowerCase();
+
+    // Connection errors
+    if (errorStr.contains('socketexception') ||
+        errorStr.contains('connection failed') ||
+        errorStr.contains('operation not permitted') ||
+        errorStr.contains('network is unreachable')) {
+      return 'تعذر الاتصال بالخادم. تحقق من اتصالك بالإنترنت.';
+    }
+
+    // Timeout errors
+    if (errorStr.contains('timeout') || errorStr.contains('timed out')) {
+      return 'انتهت مهلة الاتصال. حاول مرة أخرى.';
+    }
+
+    // Invalid credentials
+    if (errorStr.contains('invalid login') ||
+        errorStr.contains('invalid credentials') ||
+        errorStr.contains('wrong password')) {
+      return 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+    }
+
+    // User not found
+    if (errorStr.contains('user not found') ||
+        errorStr.contains('no user found')) {
+      return 'لم يتم العثور على حساب بهذا البريد الإلكتروني.';
+    }
+
+    // Email already exists
+    if (errorStr.contains('already registered') ||
+        errorStr.contains('already exists') ||
+        errorStr.contains('duplicate')) {
+      return 'هذا البريد الإلكتروني مسجل مسبقاً.';
+    }
+
+    // Too many requests
+    if (errorStr.contains('too many requests') ||
+        errorStr.contains('rate limit')) {
+      return 'محاولات كثيرة جداً. انتظر قليلاً ثم حاول مرة أخرى.';
+    }
+
+    // Generic server error
+    if (errorStr.contains('500') || errorStr.contains('server error')) {
+      return 'حدث خطأ في الخادم. حاول مرة أخرى لاحقاً.';
+    }
+
+    // Default fallback
+    return 'حدث خطأ غير متوقع. حاول مرة أخرى.';
+  }
+
+  String _formatAuthError(AuthException e) {
+    final message = e.message.toLowerCase();
+
+    if (message.contains('invalid login') ||
+        message.contains('invalid credentials')) {
+      return 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+    }
+    if (message.contains('email not confirmed')) {
+      return 'يرجى تأكيد بريدك الإلكتروني أولاً.';
+    }
+    if (message.contains('user not found')) {
+      return 'لم يتم العثور على حساب بهذا البريد الإلكتروني.';
+    }
+    if (message.contains('already registered')) {
+      return 'هذا البريد الإلكتروني مسجل مسبقاً.';
+    }
+    if (message.contains('weak password')) {
+      return 'كلمة المرور ضعيفة جداً. استخدم كلمة مرور أقوى.';
+    }
+    if (message.contains('invalid email')) {
+      return 'البريد الإلكتروني غير صالح.';
+    }
+
+    return e.message;
+  }
+
   Future<bool> signIn(String email, String password) async {
     _error = null;
     _isLoading = true;
@@ -101,12 +178,12 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
       return true;
     } on AuthException catch (e) {
-      _error = e.message;
+      _error = _formatAuthError(e);
       _isLoading = false;
       notifyListeners();
       return false;
     } catch (e) {
-      _error = e.toString();
+      _error = _formatError(e);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -125,12 +202,12 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
       return true;
     } on AuthException catch (e) {
-      _error = e.message;
+      _error = _formatAuthError(e);
       _isLoading = false;
       notifyListeners();
       return false;
     } catch (e) {
-      _error = e.toString();
+      _error = _formatError(e);
       _isLoading = false;
       notifyListeners();
       return false;

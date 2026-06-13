@@ -13,27 +13,27 @@ const List<ModernBottomNavItem> kCoordinatorShellNavItems = [
   ModernBottomNavItem(
     icon: Icons.dashboard_outlined,
     activeIcon: Icons.dashboard,
-    label: 'Overview',
+    label: 'نظرة عامة',
   ),
   ModernBottomNavItem(
     icon: Icons.people_outline,
     activeIcon: Icons.people,
-    label: 'Volunteers',
+    label: 'المتطوعين',
   ),
   ModernBottomNavItem(
     icon: Icons.assignment_outlined,
     activeIcon: Icons.assignment,
-    label: 'Tasks',
+    label: 'المهام',
   ),
   ModernBottomNavItem(
     icon: Icons.notifications_outlined,
     activeIcon: Icons.notifications,
-    label: 'Alerts',
+    label: 'التنبيهات',
   ),
   ModernBottomNavItem(
     icon: Icons.settings_outlined,
     activeIcon: Icons.settings,
-    label: 'Settings',
+    label: 'الإعدادات',
   ),
 ];
 

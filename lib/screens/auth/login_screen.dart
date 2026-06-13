@@ -53,7 +53,7 @@ class _LoginScreenState extends State<LoginScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Supabase not configured. Edit lib/config/app_config.dart with your project URL and anon key.',
+            'لم يتم تكوين Supabase. قم بتحرير lib/config/app_config.dart بعنوان URL ومفتاح anon الخاص بمشروعك.',
           ),
           duration: Duration(seconds: 6),
         ),
@@ -162,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen>
                   SlideInAnimation(
                     delay: const Duration(milliseconds: 200),
                     child: const Text(
-                      'Welcome Back',
+                      'مرحباً بعودتك',
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -177,7 +177,7 @@ class _LoginScreenState extends State<LoginScreen>
                   SlideInAnimation(
                     delay: const Duration(milliseconds: 300),
                     child: Text(
-                      'Sign in to continue helping',
+                      'سجّل الدخول للمتابعة في المساعدة',
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.white.withOpacity(0.8),
@@ -213,8 +213,8 @@ class _LoginScreenState extends State<LoginScreen>
                               controller: _emailController,
                               keyboardType: TextInputType.emailAddress,
                               decoration: InputDecoration(
-                                labelText: 'Email',
-                                hintText: 'you@example.com',
+                                labelText: 'البريد الإلكتروني',
+                                hintText: 'example@email.com',
                                 prefixIcon: const Icon(Icons.email_outlined,
                                     color: AppTheme.primary),
                                 filled: true,
@@ -231,8 +231,8 @@ class _LoginScreenState extends State<LoginScreen>
                               ),
                               validator: (v) {
                                 if (v == null || v.isEmpty)
-                                  return 'Enter your email';
-                                if (!v.contains('@')) return 'Enter a valid email';
+                                  return 'أدخل بريدك الإلكتروني';
+                                if (!v.contains('@')) return 'أدخل بريد إلكتروني صحيح';
                                 return null;
                               },
                             ),
@@ -243,7 +243,7 @@ class _LoginScreenState extends State<LoginScreen>
                               controller: _passwordController,
                               obscureText: _obscurePassword,
                               decoration: InputDecoration(
-                                labelText: 'Password',
+                                labelText: 'كلمة المرور',
                                 prefixIcon: const Icon(Icons.lock_outline,
                                     color: AppTheme.primary),
                                 suffixIcon: IconButton(
@@ -270,7 +270,7 @@ class _LoginScreenState extends State<LoginScreen>
                               ),
                               validator: (v) {
                                 if (v == null || v.isEmpty)
-                                  return 'Enter your password';
+                                  return 'أدخل كلمة المرور';
                                 return null;
                               },
                             ),
@@ -350,7 +350,7 @@ class _LoginScreenState extends State<LoginScreen>
                                                       MainAxisAlignment.center,
                                                   children: [
                                                     Text(
-                                                      'Sign In',
+                                                      'تسجيل الدخول',
                                                       style: TextStyle(
                                                         color: Colors.white,
                                                         fontSize: 17,
@@ -360,7 +360,7 @@ class _LoginScreenState extends State<LoginScreen>
                                                     ),
                                                     SizedBox(width: 8),
                                                     Icon(
-                                                      Icons.arrow_forward,
+                                                      Icons.arrow_back,
                                                       color: Colors.white,
                                                       size: 20,
                                                     ),
@@ -388,14 +388,14 @@ class _LoginScreenState extends State<LoginScreen>
                       onPressed: () => Navigator.of(context).pushNamed('/signup'),
                       child: RichText(
                         text: TextSpan(
-                          text: "Don't have an account? ",
+                          text: 'ليس لديك حساب؟ ',
                           style: TextStyle(
                             color: Colors.white.withOpacity(0.8),
                             fontSize: 15,
                           ),
                           children: const [
                             TextSpan(
-                              text: 'Sign up',
+                              text: 'إنشاء حساب',
                               style: TextStyle(
                                 color: AppTheme.accent,
                                 fontWeight: FontWeight.bold,

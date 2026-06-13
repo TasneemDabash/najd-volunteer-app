@@ -1,0 +1,126 @@
+{
+  "app_name": "Najd",
+  "version": "1.0.0",
+  "last_updated": "2026-06-13",
+
+  "google_play_data_safety": {
+    "data_collection": {
+      "personal_info": {
+        "name": {
+          "collected": true,
+          "shared": false,
+          "required": true,
+          "purpose": ["App functionality", "Account management"]
+        },
+        "email_address": {
+          "collected": true,
+          "shared": false,
+          "required": true,
+          "purpose": ["App functionality", "Account management", "Communications"]
+        },
+        "phone_number": {
+          "collected": true,
+          "shared": false,
+          "required": false,
+          "purpose": ["App functionality", "Emergency contact"]
+        }
+      },
+      "location": {
+        "approximate_location": {
+          "collected": true,
+          "shared": true,
+          "shared_with": "Task coordinators only",
+          "required": false,
+          "purpose": ["App functionality", "Match with nearby tasks"]
+        },
+        "precise_location": {
+          "collected": true,
+          "shared": true,
+          "shared_with": "Task coordinators only",
+          "required": false,
+          "purpose": ["App functionality", "Match with nearby tasks"]
+        }
+      },
+      "photos_and_videos": {
+        "photos": {
+          "collected": true,
+          "shared": true,
+          "shared_with": "Task coordinators only",
+          "required": false,
+          "purpose": ["App functionality", "Task documentation"]
+        }
+      },
+      "audio": {
+        "voice_recordings": {
+          "collected": true,
+          "shared": true,
+          "shared_with": "Support team and coordinators",
+          "required": false,
+          "purpose": ["App functionality", "Voice messages", "Calls"]
+        }
+      },
+      "app_activity": {
+        "app_interactions": {
+          "collected": true,
+          "shared": false,
+          "required": false,
+          "purpose": ["Analytics", "App improvement"]
+        }
+      }
+    },
+    "security_practices": {
+      "data_encrypted_in_transit": true,
+      "data_deletion_request": true,
+      "independent_security_review": false
+    }
+  },
+
+  "apple_app_privacy": {
+    "data_linked_to_you": [
+      {
+        "category": "Contact Info",
+        "data_types": ["Name", "Email Address", "Phone Number"],
+        "purpose": ["App Functionality"]
+      },
+      {
+        "category": "Location",
+        "data_types": ["Coarse Location", "Precise Location"],
+        "purpose": ["App Functionality"]
+      },
+      {
+        "category": "User Content",
+        "data_types": ["Photos or Videos", "Audio Data"],
+        "purpose": ["App Functionality"]
+      }
+    ],
+    "data_not_linked_to_you": [
+      {
+        "category": "Usage Data",
+        "data_types": ["Product Interaction"],
+        "purpose": ["Analytics"]
+      },
+      {
+        "category": "Diagnostics",
+        "data_types": ["Crash Data", "Performance Data"],
+        "purpose": ["App Functionality"]
+      }
+    ],
+    "data_used_to_track_you": []
+  },
+
+  "permissions_required": {
+    "ios": {
+      "NSCameraUsageDescription": "Video calls with support team",
+      "NSMicrophoneUsageDescription": "Voice messages and calls",
+      "NSLocationWhenInUseUsageDescription": "Match with nearby tasks",
+      "NSPhotoLibraryUsageDescription": "Share task-related images"
+    },
+    "android": {
+      "CAMERA": "Video calls with support team",
+      "RECORD_AUDIO": "Voice messages and calls",
+      "ACCESS_FINE_LOCATION": "Match with nearby tasks",
+      "READ_MEDIA_IMAGES": "Share task-related images",
+      "POST_NOTIFICATIONS": "Receive task notifications"
+    }
+  }
+}

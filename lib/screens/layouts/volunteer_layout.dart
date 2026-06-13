@@ -24,9 +24,9 @@ class _VolunteerLayoutState extends State<VolunteerLayout> {
 
   String _getGreeting() {
     final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good Morning';
-    if (hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
+    if (hour < 12) return 'صباح الخير';
+    if (hour < 17) return 'مساء الخير';
+    return 'مساء الخير';
   }
 
   @override
@@ -51,27 +51,27 @@ class _VolunteerLayoutState extends State<VolunteerLayout> {
           ModernBottomNavItem(
             icon: Icons.home_outlined,
             activeIcon: Icons.home,
-            label: 'Home',
+            label: 'الرئيسية',
           ),
           ModernBottomNavItem(
             icon: Icons.assignment_outlined,
             activeIcon: Icons.assignment,
-            label: 'Tasks',
+            label: 'المهام',
           ),
           ModernBottomNavItem(
             icon: Icons.schedule_outlined,
             activeIcon: Icons.schedule,
-            label: 'Schedule',
+            label: 'الجدول',
           ),
           ModernBottomNavItem(
             icon: Icons.support_agent_outlined,
             activeIcon: Icons.support_agent,
-            label: 'Support',
+            label: 'الدعم',
           ),
           ModernBottomNavItem(
             icon: Icons.person_outline,
             activeIcon: Icons.person,
-            label: 'Profile',
+            label: 'الملف',
           ),
         ],
       ),
@@ -97,10 +97,10 @@ class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
   late AnimationController _rotationController;
 
   final List<String> _quotes = [
-    '"The best way to find yourself is to lose yourself in the service of others." - Gandhi',
-    '"Volunteers don\'t get paid, not because they\'re worthless, but because they\'re priceless."',
-    '"No one has ever become poor by giving." - Anne Frank',
-    '"Service to others is the rent you pay for your room here on earth." - Muhammad Ali',
+    '"أفضل طريقة لإيجاد نفسك هي أن تضيع نفسك في خدمة الآخرين." - غاندي',
+    '"المتطوعون لا يتقاضون أجراً، ليس لأنهم بلا قيمة، بل لأنهم لا يُقدّرون بثمن."',
+    '"لم يفتقر أحد قط بسبب العطاء." - آن فرانك',
+    '"خدمة الآخرين هي الإيجار الذي تدفعه مقابل وجودك على هذه الأرض." - محمد علي',
   ];
 
   @override
@@ -170,7 +170,7 @@ class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
                           ),
                           const SizedBox(height: 2),
                           const Text(
-                            'Volunteer',
+                            'متطوع',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -281,7 +281,7 @@ class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
                                     color: AppTheme.textPrimary, size: 14),
                                 SizedBox(width: 4),
                                 Text(
-                                  'Active Volunteer',
+                                  'متطوع نشط',
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
@@ -293,7 +293,7 @@ class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
                           ),
                           const SizedBox(height: 16),
                           const Text(
-                            'Thank you for making a difference!',
+                            'شكراً لك على إحداث الفرق!',
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
@@ -303,7 +303,7 @@ class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Your contribution helps build a better community.',
+                            'مساهمتك تساعد في بناء مجتمع أفضل.',
                             style: TextStyle(
                               fontSize: 14,
                               color: Colors.white.withOpacity(0.85),
@@ -323,7 +323,7 @@ class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    'View My Tasks',
+                                    'عرض مهامي',
                                     style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w600,
@@ -331,7 +331,7 @@ class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
                                     ),
                                   ),
                                   SizedBox(width: 8),
-                                  Icon(Icons.arrow_forward,
+                                  Icon(Icons.arrow_back,
                                       size: 18, color: AppTheme.primary),
                                 ],
                               ),
@@ -356,7 +356,7 @@ class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
                         icon: Icons.check_circle,
                         iconColor: AppTheme.success,
                         value: '12',
-                        label: 'Completed',
+                        label: 'مكتملة',
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -365,7 +365,7 @@ class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
                         icon: Icons.pending_actions,
                         iconColor: AppTheme.warning,
                         value: '3',
-                        label: 'Pending',
+                        label: 'معلقة',
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -374,7 +374,7 @@ class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
                         icon: Icons.access_time,
                         iconColor: AppTheme.accent,
                         value: '48h',
-                        label: 'Hours',
+                        label: 'ساعات',
                       ),
                     ),
                   ],
@@ -386,7 +386,7 @@ class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
               // Quick Actions Grid
               SlideInAnimation(
                 delay: const Duration(milliseconds: 300),
-                child: const SectionHeader(title: 'Quick Actions'),
+                child: const SectionHeader(title: 'إجراءات سريعة'),
               ),
 
               const SizedBox(height: 12),
@@ -398,7 +398,7 @@ class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
                     Expanded(
                       child: _QuickActionCard(
                         icon: Icons.assignment,
-                        label: 'My Tasks',
+                        label: 'مهامي',
                         gradient: AppTheme.purpleGradient,
                         onTap: () => widget.onNavigateToTab(1),
                       ),
@@ -407,7 +407,7 @@ class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
                     Expanded(
                       child: _QuickActionCard(
                         icon: Icons.event_available,
-                        label: 'Availability',
+                        label: 'التوفر',
                         gradient: AppTheme.successGradient,
                         onTap: () => widget.onNavigateToTab(2),
                       ),
@@ -425,7 +425,7 @@ class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
                     Expanded(
                       child: _QuickActionCard(
                         icon: Icons.person,
-                        label: 'Profile',
+                        label: 'الملف',
                         gradient: AppTheme.redGradient,
                         onTap: () => widget.onNavigateToTab(4),
                       ),
@@ -434,7 +434,7 @@ class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
                     Expanded(
                       child: _QuickActionCard(
                         icon: Icons.support_agent,
-                        label: 'Support',
+                        label: 'الدعم',
                         gradient: AppTheme.pinkGradient,
                         onTap: () => widget.onNavigateToTab(3),
                       ),
@@ -475,7 +475,7 @@ class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text(
-                              'Daily Inspiration',
+                              'إلهام اليوم',
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -541,7 +541,7 @@ class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
-                                'Need Help?',
+                                'تحتاج مساعدة؟',
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -550,7 +550,7 @@ class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Contact our support team',
+                                'تواصل مع فريق الدعم',
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: AppTheme.textSecondary,

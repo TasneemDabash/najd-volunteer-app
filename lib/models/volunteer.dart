@@ -156,19 +156,19 @@ class Volunteer {
 }
 
 const List<String> skillOptions = [
-  'Medical',
-  'Logistics',
-  'Driving',
-  'Translation',
-  'Media',
-  'Technical',
-  'General Help',
+  'طبي',
+  'لوجستي',
+  'قيادة',
+  'ترجمة',
+  'إعلام',
+  'تقني',
+  'مساعدة عامة',
 ];
 
 const List<String> availabilityOptions = [
-  'Morning',
-  'Afternoon',
-  'Evening',
-  'Weekends',
-  'Emergency Only',
+  'صباحاً',
+  'ظهراً',
+  'مساءً',
+  'عطلة نهاية الأسبوع',
+  'حالات الطوارئ فقط',
 ];

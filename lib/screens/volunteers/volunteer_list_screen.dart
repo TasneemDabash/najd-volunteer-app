@@ -34,6 +34,8 @@ class _VolunteerListScreenState extends State<VolunteerListScreen> {
   String? _filterLocationId;
   AppLocation? _filterLocation;
   String? _filterRole;
+  String? _filterSkill;
+  String? _filterAvailabilityTime;
   bool _onlineOnly = false;
   bool _availableOnly = false;
   AppLocation? _accidentLocation;
@@ -116,6 +118,16 @@ class _VolunteerListScreenState extends State<VolunteerListScreen> {
           .where((v) => (v.appRole ?? 'volunteer').toLowerCase() == _filterRole)
           .toList();
     }
+    if (_filterSkill != null && _filterSkill!.isNotEmpty) {
+      listCopy = listCopy
+          .where((v) => v.skills.contains(_filterSkill))
+          .toList();
+    }
+    if (_filterAvailabilityTime != null && _filterAvailabilityTime!.isNotEmpty) {
+      listCopy = listCopy
+          .where((v) => v.availability.contains(_filterAvailabilityTime))
+          .toList();
+    }
     if (_onlineOnly) {
       listCopy = listCopy.where((v) => v.isOnline).toList();
     }
@@ -184,23 +196,25 @@ class _VolunteerListScreenState extends State<VolunteerListScreen> {
     final activeFilters = <String>[];
     if (_filterCity != null) activeFilters.add(_filterCity!);
     if (_filterLocation != null) activeFilters.add(_filterLocation!.name);
-    if (_filterRole != null) activeFilters.add('Role: $_filterRole');
-    if (_onlineOnly) activeFilters.add('Online');
-    if (_availableOnly) activeFilters.add('Available');
+    if (_filterRole != null) activeFilters.add('الدور: $_filterRole');
+    if (_filterSkill != null) activeFilters.add('المهارة: $_filterSkill');
+    if (_filterAvailabilityTime != null) activeFilters.add('الوقت: $_filterAvailabilityTime');
+    if (_onlineOnly) activeFilters.add('متصل');
+    if (_availableOnly) activeFilters.add('متاح');
     if (_accidentLocation != null) {
-      activeFilters.add('Near ${_accidentLocation!.name}');
+      activeFilters.add('قريب من ${_accidentLocation!.name}');
     }
 
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: AppBar(
-        title: Text(_coordinatorDirectory ? 'Members' : 'Volunteers'),
+        title: Text(_coordinatorDirectory ? 'الأعضاء' : 'المتطوعين'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
           if (_coordinatorDirectory)
             IconButton(
-              tooltip: 'Find closest to accident',
+              tooltip: 'البحث عن الأقرب للحادث',
               icon: Icon(
                 _accidentLocation == null
                     ? Icons.local_hospital_outlined
@@ -228,7 +242,7 @@ class _VolunteerListScreenState extends State<VolunteerListScreen> {
                   controller: _searchController,
                   onChanged: (_) => _applyFilters(),
                   decoration: InputDecoration(
-                    hintText: 'Search by name, location, phone, email...',
+                    hintText: 'ابحث بالاسم، الموقع، الهاتف، البريد...',
                     hintStyle: const TextStyle(color: AppTheme.textLight),
                     prefixIcon:
                         const Icon(Icons.search, color: AppTheme.primary),
@@ -267,7 +281,7 @@ class _VolunteerListScreenState extends State<VolunteerListScreen> {
                 children: [
                   _Pill(
                     icon: Icons.bolt_rounded,
-                    label: 'Online',
+                    label: 'متصل',
                     selected: _onlineOnly,
                     color: AppTheme.success,
                     onTap: () {
@@ -278,7 +292,7 @@ class _VolunteerListScreenState extends State<VolunteerListScreen> {
                   const SizedBox(width: 8),
                   _Pill(
                     icon: Icons.event_available_rounded,
-                    label: 'Available',
+                    label: 'متاح',
                     selected: _availableOnly,
                     color: AppTheme.primary,
                     onTap: () {
@@ -291,15 +305,15 @@ class _VolunteerListScreenState extends State<VolunteerListScreen> {
                     _ModernDropdown(
                       icon: Icons.shield_outlined,
                       label: _filterRole == null
-                          ? 'All Roles'
-                          : 'Role: $_filterRole',
+                          ? 'كل الأدوار'
+                          : 'الدور: $_filterRole',
                       items: const [
-                        DropdownMenuItem(value: null, child: Text('All Roles')),
+                        DropdownMenuItem(value: null, child: Text('كل الأدوار')),
                         DropdownMenuItem(
-                            value: 'volunteer', child: Text('Volunteer')),
+                            value: 'volunteer', child: Text('متطوع')),
                         DropdownMenuItem(
-                            value: 'support', child: Text('Support')),
-                        DropdownMenuItem(value: 'admin', child: Text('Admin')),
+                            value: 'support', child: Text('دعم')),
+                        DropdownMenuItem(value: 'admin', child: Text('مدير')),
                       ],
                       onChanged: (v) {
                         setState(() => _filterRole = v);
@@ -310,11 +324,11 @@ class _VolunteerListScreenState extends State<VolunteerListScreen> {
                   ],
                   _ModernDropdown(
                     icon: Icons.location_city,
-                    label: _filterCity ?? 'All Cities',
+                    label: _filterCity ?? 'كل المدن',
                     items: [
                       const DropdownMenuItem(
                         value: null,
-                        child: Text('All Cities'),
+                        child: Text('كل المدن'),
                       ),
                       ..._cities.map(
                         (c) => DropdownMenuItem(value: c, child: Text(c)),
@@ -322,6 +336,42 @@ class _VolunteerListScreenState extends State<VolunteerListScreen> {
                     ],
                     onChanged: (v) {
                       setState(() => _filterCity = v);
+                      _applyFilters();
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  _ModernDropdown(
+                    icon: Icons.build_circle_outlined,
+                    label: _filterSkill ?? 'كل المهارات',
+                    items: [
+                      const DropdownMenuItem(
+                        value: null,
+                        child: Text('كل المهارات'),
+                      ),
+                      ...skillOptions.map(
+                        (s) => DropdownMenuItem(value: s, child: Text(s)),
+                      ),
+                    ],
+                    onChanged: (v) {
+                      setState(() => _filterSkill = v);
+                      _applyFilters();
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  _ModernDropdown(
+                    icon: Icons.schedule_outlined,
+                    label: _filterAvailabilityTime ?? 'كل الأوقات',
+                    items: [
+                      const DropdownMenuItem(
+                        value: null,
+                        child: Text('كل الأوقات'),
+                      ),
+                      ...availabilityOptions.map(
+                        (a) => DropdownMenuItem(value: a, child: Text(a)),
+                      ),
+                    ],
+                    onChanged: (v) {
+                      setState(() => _filterAvailabilityTime = v);
                       _applyFilters();
                     },
                   ),
@@ -350,10 +400,10 @@ class _VolunteerListScreenState extends State<VolunteerListScreen> {
                 padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
                 child: LocationPicker(
                   selectedId: _filterLocationId,
-                  label: 'Filter by current location',
-                  hint: 'Any location',
+                  label: 'فلترة حسب الموقع الحالي',
+                  hint: 'أي موقع',
                   includeNoneOption: true,
-                  noneLabel: 'Any location',
+                  noneLabel: 'أي موقع',
                   onChanged: (loc) {
                     setState(() {
                       _filterLocation = loc;
@@ -409,7 +459,7 @@ class _VolunteerListScreenState extends State<VolunteerListScreen> {
                             const Padding(
                               padding: EdgeInsets.symmetric(horizontal: 24),
                               child: Text(
-                                'No volunteers match your filters.',
+                                'لا يوجد متطوعين يطابقون الفلاتر.',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 15,
@@ -565,13 +615,13 @@ class _ModernSortChip extends StatelessWidget {
   String get _sortLabel {
     switch (currentSort) {
       case SortOption.newest:
-        return 'Newest';
+        return 'الأحدث';
       case SortOption.alphabetical:
-        return 'A–Z';
+        return 'أ–ي';
       case SortOption.city:
-        return 'City';
+        return 'المدينة';
       case SortOption.distance:
-        return 'Closest';
+        return 'الأقرب';
     }
   }
 
@@ -583,12 +633,12 @@ class _ModernSortChip extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       offset: const Offset(0, 45),
       itemBuilder: (context) => [
-        _buildMenuItem(SortOption.newest, 'Newest', Icons.access_time),
+        _buildMenuItem(SortOption.newest, 'الأحدث', Icons.access_time),
         _buildMenuItem(
-            SortOption.alphabetical, 'Alphabetical', Icons.sort_by_alpha),
-        _buildMenuItem(SortOption.city, 'By City', Icons.location_city),
+            SortOption.alphabetical, 'أبجدياً', Icons.sort_by_alpha),
+        _buildMenuItem(SortOption.city, 'حسب المدينة', Icons.location_city),
         if (hasOrigin)
-          _buildMenuItem(SortOption.distance, 'Closest to accident',
+          _buildMenuItem(SortOption.distance, 'الأقرب للحادث',
               Icons.near_me_rounded),
       ],
       child: Container(
@@ -696,7 +746,7 @@ class _AccidentPickerSheet extends StatelessWidget {
                   const SizedBox(width: 8),
                   const Expanded(
                     child: Text(
-                      'Accident / incident location',
+                      'موقع الحادث',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
@@ -709,7 +759,7 @@ class _AccidentPickerSheet extends StatelessWidget {
                         onClear();
                         Navigator.pop(context);
                       },
-                      child: const Text('Clear'),
+                      child: const Text('مسح'),
                     ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
@@ -719,7 +769,7 @@ class _AccidentPickerSheet extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               const Text(
-                'Pick where the accident is. We will compute the closest volunteers using coordinates.',
+                'اختر موقع الحادث. سنحسب أقرب المتطوعين باستخدام الإحداثيات.',
                 style:
                     TextStyle(fontSize: 12, color: AppTheme.textSecondary),
               ),
@@ -899,7 +949,7 @@ class _ModernVolunteerCardState extends State<_ModernVolunteerCard> {
                             Flexible(
                               child: Text(
                                 v.currentLocationName ??
-                                    (v.city.isEmpty ? 'No location' : v.city),
+                                    (v.city.isEmpty ? 'لا يوجد موقع' : v.city),
                                 style: const TextStyle(
                                   fontSize: 13,
                                   color: AppTheme.textSecondary,
@@ -937,12 +987,12 @@ class _ModernVolunteerCardState extends State<_ModernVolunteerCard> {
                           children: [
                             if (v.isAvailable)
                               _MicroBadge(
-                                label: 'Available',
+                                label: 'متاح',
                                 color: AppTheme.success,
                               )
                             else
                               _MicroBadge(
-                                label: 'Busy',
+                                label: 'مشغول',
                                 color: AppTheme.warning,
                               ),
                             ...v.skills.take(2).map(

@@ -109,7 +109,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Dashboard',
+                                      'لوحة التحكم',
                                       style: TextStyle(
                                         fontSize: 28,
                                         fontWeight: FontWeight.bold,
@@ -119,7 +119,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      'Support team — coordinate volunteers & tasks',
+                                      'فريق الدعم — تنسيق المتطوعين والمهام',
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
@@ -186,7 +186,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                                             const SizedBox(width: 8),
                                             Expanded(
                                               child: Text(
-                                                'Najd Volunteer',
+                                                'نجد للتطوع',
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: const TextStyle(
@@ -200,7 +200,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                                         ),
                                         const SizedBox(height: 12),
                                         Text(
-                                          'Coordinate volunteers and manage tasks efficiently',
+                                          'تنسيق المتطوعين وإدارة المهام بكفاءة',
                                           style: TextStyle(
                                             fontSize: 14,
                                             color: AppTheme.textSecondary,
@@ -242,7 +242,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                                     children: [
                                       Expanded(
                                         child: _AnimatedStatCard(
-                                          title: 'Volunteers',
+                                          title: 'المتطوعين',
                                           value: (_totalVolunteers *
                                                   _counterAnimation.value)
                                               .toInt(),
@@ -254,7 +254,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                                       const SizedBox(width: 12),
                                       Expanded(
                                         child: _AnimatedStatCard(
-                                          title: 'Active Tasks',
+                                          title: 'المهام النشطة',
                                           value: (_activeTasks *
                                                   _counterAnimation.value)
                                               .toInt(),
@@ -270,7 +270,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                                     children: [
                                       Expanded(
                                         child: _AnimatedStatCard(
-                                          title: 'Completed',
+                                          title: 'المكتملة',
                                           value: (_completedTasks *
                                                   _counterAnimation.value)
                                               .toInt(),
@@ -282,7 +282,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                                       const SizedBox(width: 12),
                                       Expanded(
                                         child: _AnimatedStatCard(
-                                          title: 'Emergency',
+                                          title: 'طوارئ',
                                           value: (_emergencyRequests *
                                                   _counterAnimation.value)
                                               .toInt(),
@@ -303,7 +303,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                         // Quick actions
                         SlideInAnimation(
                           delay: const Duration(milliseconds: 300),
-                          child: const SectionHeader(title: 'Quick Actions'),
+                          child: const SectionHeader(title: 'إجراءات سريعة'),
                         ),
 
                         const SizedBox(height: 12),
@@ -315,7 +315,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                               Expanded(
                                 child: _QuickActionButton(
                                   icon: Icons.people_alt_rounded,
-                                  label: 'Browse Volunteers',
+                                  label: 'تصفح المتطوعين',
                                   gradient: AppTheme.primaryGradient,
                                   onTap: () => Navigator.push(
                                     context,
@@ -330,7 +330,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                               Expanded(
                                 child: _QuickActionButton(
                                   icon: Icons.add_task,
-                                  label: 'Create Task',
+                                  label: 'إنشاء مهمة',
                                   gradient: AppTheme.secondaryGradient,
                                   onTap: () => Navigator.push(
                                     context,
@@ -349,7 +349,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                         // Services section
                         SlideInAnimation(
                           delay: const Duration(milliseconds: 400),
-                          child: const SectionHeader(title: 'Services'),
+                          child: const SectionHeader(title: 'الخدمات'),
                         ),
 
                         const SizedBox(height: 12),
@@ -359,8 +359,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                           delay: const Duration(milliseconds: 450),
                           child: _ServiceCard(
                             icon: Icons.local_hospital,
-                            title: 'Medical Assistance',
-                            description: 'Healthcare and medical support services',
+                            title: 'المساعدة الطبية',
+                            description: 'خدمات الرعاية الصحية والدعم الطبي',
                             gradient: AppTheme.redGradient,
                             onTap: () {},
                           ),
@@ -372,8 +372,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                           delay: const Duration(milliseconds: 500),
                           child: _ServiceCard(
                             icon: Icons.people_alt,
-                            title: 'Community Help',
-                            description: 'Support for community members in need',
+                            title: 'مساعدة المجتمع',
+                            description: 'دعم أفراد المجتمع المحتاجين',
                             gradient: AppTheme.purpleGradient,
                             onTap: () {},
                           ),
@@ -385,8 +385,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                           delay: const Duration(milliseconds: 550),
                           child: _ServiceCard(
                             icon: Icons.school,
-                            title: 'Education Support',
-                            description: 'Tutoring and educational assistance',
+                            title: 'الدعم التعليمي',
+                            description: 'التدريس والمساعدة التعليمية',
                             gradient: AppTheme.successGradient,
                             onTap: () {},
                           ),
@@ -397,7 +397,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                         // Navigation cards
                         SlideInAnimation(
                           delay: const Duration(milliseconds: 600),
-                          child: const SectionHeader(title: 'Manage'),
+                          child: const SectionHeader(title: 'إدارة'),
                         ),
 
                         const SizedBox(height: 12),
@@ -408,8 +408,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                             children: [
                               Expanded(
                                 child: ActionCard(
-                                  title: 'Volunteers',
-                                  subtitle: 'View all volunteers',
+                                  title: 'المتطوعين',
+                                  subtitle: 'عرض جميع المتطوعين',
                                   icon: Icons.list,
                                   iconGradient: AppTheme.primaryGradient,
                                   onTap: () => Navigator.push(
@@ -423,8 +423,8 @@ class _DashboardScreenState extends State<DashboardScreen>
                               const SizedBox(width: 12),
                               Expanded(
                                 child: ActionCard(
-                                  title: 'Tasks',
-                                  subtitle: 'View all tasks',
+                                  title: 'المهام',
+                                  subtitle: 'عرض جميع المهام',
                                   icon: Icons.assignment_turned_in,
                                   iconGradient: AppTheme.secondaryGradient,
                                   onTap: () => Navigator.push(

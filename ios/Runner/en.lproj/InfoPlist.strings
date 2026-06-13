@@ -1,0 +1,11 @@
+/* English localization for iOS privacy descriptions */
+
+"NSCameraUsageDescription" = "Najd uses the camera for video calls between volunteers and support.";
+"NSMicrophoneUsageDescription" = "Najd uses the microphone for voice messages and voice/video calls.";
+"NSLocationWhenInUseUsageDescription" = "Najd uses your location to match you with nearby incidents and tasks.";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "Najd uses your location to match you with nearby incidents and tasks.";
+"NSPhotoLibraryUsageDescription" = "Najd needs access to your photo library to share images related to tasks.";
+"NSPhotoLibraryAddUsageDescription" = "Najd needs permission to save photos to your library.";
+"NSContactsUsageDescription" = "Najd may access contacts to help you invite other volunteers.";
+"NSUserTrackingUsageDescription" = "We use this to improve your experience and show relevant content.";
+"CFBundleDisplayName" = "Najd";

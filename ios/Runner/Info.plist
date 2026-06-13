@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -22,7 +24,27 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Najd uses the camera for video calls between volunteers and support.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Najd may access contacts to help you invite other volunteers.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Najd uses your location to match you with nearby incidents and tasks.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Najd uses your location to match you with nearby incidents and tasks.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Najd uses the microphone for voice messages and voice/video calls between volunteers and support.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Najd needs permission to save photos to your library.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Najd needs access to your photo library to share images related to tasks.</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>We use this to improve your experience and show relevant content.</string>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
@@ -41,17 +63,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Najd uses the microphone for voice messages and voice/video calls between volunteers and support.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>Najd uses the camera for video calls between volunteers and support.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Najd uses your location to match you with nearby incidents and tasks.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Najd uses your location to match you with nearby incidents and tasks.</string>
 </dict>
 </plist>
