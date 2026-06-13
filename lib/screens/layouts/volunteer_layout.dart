@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 import '../../config/theme.dart';
+import '../../services/task_service.dart';
 import '../../widgets/animations.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/modern_bottom_nav.dart';
@@ -95,6 +96,12 @@ class _VolunteerHomeScreen extends StatefulWidget {
 class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _rotationController;
+  final TaskService _taskService = TaskService();
+
+  int _completedTasks = 0;
+  int _pendingTasks = 0;
+  int _totalHours = 0;
+  bool _loadingStats = true;
 
   final List<String> _quotes = [
     '"أفضل طريقة لإيجاد نفسك هي أن تضيع نفسك في خدمة الآخرين." - غاندي',
@@ -110,6 +117,26 @@ class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
       duration: const Duration(seconds: 10),
       vsync: this,
     )..repeat();
+    _loadStats();
+  }
+
+  Future<void> _loadStats() async {
+    setState(() => _loadingStats = true);
+    try {
+      final completed = await _taskService.getMyCompletedTasksCount();
+      final pending = await _taskService.getMyPendingTasksCount();
+      final hours = await _taskService.getMyTotalHours();
+      if (mounted) {
+        setState(() {
+          _completedTasks = completed;
+          _pendingTasks = pending;
+          _totalHours = hours;
+          _loadingStats = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _loadingStats = false);
+    }
   }
 
   @override
@@ -355,7 +382,7 @@ class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
                       child: _MiniStatCard(
                         icon: Icons.check_circle,
                         iconColor: AppTheme.success,
-                        value: '12',
+                        value: _loadingStats ? '-' : '$_completedTasks',
                         label: 'مكتملة',
                       ),
                     ),
@@ -364,7 +391,7 @@ class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
                       child: _MiniStatCard(
                         icon: Icons.pending_actions,
                         iconColor: AppTheme.warning,
-                        value: '3',
+                        value: _loadingStats ? '-' : '$_pendingTasks',
                         label: 'معلقة',
                       ),
                     ),
@@ -373,7 +400,7 @@ class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
                       child: _MiniStatCard(
                         icon: Icons.access_time,
                         iconColor: AppTheme.accent,
-                        value: '48h',
+                        value: _loadingStats ? '-' : '${_totalHours}h',
                         label: 'ساعات',
                       ),
                     ),

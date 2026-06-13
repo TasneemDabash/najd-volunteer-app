@@ -23,6 +23,9 @@ class AccountService {
 
   Future<UserProfile> getOrCreateProfile({
     String? email,
+    String? fullName,
+    String? phone,
+    String? city,
   }) async {
     final userId = currentUserId;
     if (userId == null) {
@@ -35,10 +38,10 @@ class AccountService {
     final now = DateTime.now().toIso8601String();
     final data = {
       'id': userId,
-      'full_name': '',
+      'full_name': fullName ?? '',
       'email': email ?? _client.auth.currentUser?.email ?? '',
-      'phone': '',
-      'city': '',
+      'phone': phone ?? '',
+      'city': city ?? '',
       'skills': <String>[],
       'availability': <String>[],
       'notes': null,

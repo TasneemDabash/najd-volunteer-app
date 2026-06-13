@@ -25,9 +25,12 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: _showArabic ? _buildArabicContent() : _buildEnglishContent(),
+      body: Directionality(
+        textDirection: _showArabic ? TextDirection.rtl : TextDirection.ltr,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: _showArabic ? _buildArabicContent() : _buildEnglishContent(),
+        ),
       ),
     );
   }

@@ -5,6 +5,7 @@ import '../providers/auth_provider.dart';
 import 'my_profile_screen.dart';
 import 'legal/privacy_policy_screen.dart';
 import 'legal/terms_of_service_screen.dart';
+import 'settings/request_role_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -22,6 +23,16 @@ class SettingsScreen extends StatelessWidget {
             subtitle: const Text('عرض وتعديل ملفك الشخصي'),
             trailing: const Icon(Icons.chevron_left),
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MyProfileScreen())),
+          ),
+          ListTile(
+            leading: const Icon(Icons.admin_panel_settings_outlined),
+            title: const Text('طلب صلاحيات'),
+            subtitle: const Text('طلب الترقية لمنسق أو دعم فني'),
+            trailing: const Icon(Icons.chevron_left),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const RequestRoleScreen()),
+            ),
           ),
           ListTile(
             leading: Icon(Icons.sync, color: AppTheme.secondary),

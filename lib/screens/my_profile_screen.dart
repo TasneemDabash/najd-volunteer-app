@@ -152,27 +152,43 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                 ),
                 child: Column(
                   children: [
-                    // Edit button
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 16),
-                        child: IconButton(
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => const _MyProfileFormScreen()),
-                          ).then((_) => _load()),
-                          icon: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(12),
+                    // Back and Edit buttons
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Back button
+                          IconButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            icon: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(Icons.arrow_forward,
+                                  color: Colors.white, size: 20),
                             ),
-                            child: const Icon(Icons.edit,
-                                color: Colors.white, size: 20),
                           ),
-                        ),
+                          // Edit button
+                          IconButton(
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const _MyProfileFormScreen()),
+                            ).then((_) => _load()),
+                            icon: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(Icons.edit,
+                                  color: Colors.white, size: 20),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     // Avatar

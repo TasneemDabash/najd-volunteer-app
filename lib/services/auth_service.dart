@@ -35,4 +35,14 @@ class AuthService {
   Future<User?> getSession() async {
     return _client.auth.currentUser;
   }
+
+  Future<void> resetPassword(String email) async {
+    await _client.auth.resetPasswordForEmail(email);
+  }
+
+  Future<void> updatePassword(String newPassword) async {
+    await _client.auth.updateUser(
+      UserAttributes(password: newPassword),
+    );
+  }
 }

@@ -190,14 +190,49 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> signUp(String email, String password) async {
+  Future<bool> signUp(
+    String email,
+    String password, {
+    String? fullName,
+    String? phone,
+    String? city,
+  }) async {
     _error = null;
     _isLoading = true;
     notifyListeners();
     try {
       await _authService.signUp(email: email, password: password);
       _setUser(_authService.currentUser);
-      await _loadProfile();
+      // Create profile with provided info
+      _profile = await _accountService.getOrCreateProfile(
+        email: email,
+        fullName: fullName,
+        phone: phone,
+        city: city,
+      );
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } on AuthException catch (e) {
+      _error = _formatAuthError(e);
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    } catch (e) {
+      _error = _formatError(e);
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Reset password - sends reset email via Supabase
+  Future<bool> resetPassword(String email) async {
+    _error = null;
+    _isLoading = true;
+    notifyListeners();
+    try {
+      await _authService.resetPassword(email);
       _isLoading = false;
       notifyListeners();
       return true;

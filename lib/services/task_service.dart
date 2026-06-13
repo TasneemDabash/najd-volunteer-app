@@ -313,6 +313,63 @@ class TaskService {
     return (response as List).length;
   }
 
+  /// Get completed tasks count for the current volunteer
+  Future<int> getMyCompletedTasksCount() async {
+    final me = _client.auth.currentUser?.id;
+    if (me == null) return 0;
+    try {
+      final response = await _client
+          .from(_assignmentsTable)
+          .select('task:tasks!inner(id, status)')
+          .eq('volunteer_id', me)
+          .eq('tasks.status', 'completed');
+      return (response as List).length;
+    } catch (_) {
+      // Fallback: just get all assignments and filter
+      final assignments = await _client
+          .from(_assignmentsTable)
+          .select('task_id')
+          .eq('volunteer_id', me);
+      if ((assignments as List).isEmpty) return 0;
+      final taskIds = assignments.map((e) => e['task_id'] as String).toList();
+      final tasks = await _client
+          .from(_tasksTable)
+          .select('id')
+          .inFilter('id', taskIds)
+          .eq('status', 'completed');
+      return (tasks as List).length;
+    }
+  }
+
+  /// Get pending tasks count for the current volunteer
+  Future<int> getMyPendingTasksCount() async {
+    final me = _client.auth.currentUser?.id;
+    if (me == null) return 0;
+    try {
+      final assignments = await _client
+          .from(_assignmentsTable)
+          .select('task_id')
+          .eq('volunteer_id', me);
+      if ((assignments as List).isEmpty) return 0;
+      final taskIds = assignments.map((e) => e['task_id'] as String).toList();
+      final tasks = await _client
+          .from(_tasksTable)
+          .select('id')
+          .inFilter('id', taskIds)
+          .inFilter('status', ['pending', 'active']);
+      return (tasks as List).length;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  /// Get total volunteer hours (estimate: 2 hours per completed task)
+  Future<int> getMyTotalHours() async {
+    final completed = await getMyCompletedTasksCount();
+    // Estimate 2 hours per completed task
+    return completed * 2;
+  }
+
   /// Tasks currently assigned to the signed-in volunteer. Uses the
   /// `list_my_assigned_tasks` RPC (joins location for display). Falls back to a
   /// direct join in case the RPC is missing.
