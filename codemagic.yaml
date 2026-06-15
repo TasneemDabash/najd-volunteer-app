@@ -10,7 +10,7 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.najd.volunteerapp
       flutter: stable
-      xcode: latest
+      xcode: 26
       cocoapods: default
     scripts:
       - name: Set up code signing settings on Xcode project
