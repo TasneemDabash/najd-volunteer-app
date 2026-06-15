@@ -8,7 +8,7 @@ workflows:
     environment:
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: com.tasneemdabash.najdvolunteer
+        bundle_identifier: com.najd.volunteerapp
       flutter: stable
       xcode: 26
       cocoapods: default
