@@ -22,6 +22,13 @@ CREATE INDEX IF NOT EXISTS idx_role_requests_status ON role_requests(status);
 -- Enable RLS
 ALTER TABLE role_requests ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies first (makes script re-runnable)
+DROP POLICY IF EXISTS "Users can view own requests" ON role_requests;
+DROP POLICY IF EXISTS "Users can create own requests" ON role_requests;
+DROP POLICY IF EXISTS "Users can cancel own pending requests" ON role_requests;
+DROP POLICY IF EXISTS "Admin can view all requests" ON role_requests;
+DROP POLICY IF EXISTS "Admin can update requests" ON role_requests;
+
 -- Users can view their own requests
 CREATE POLICY "Users can view own requests"
   ON role_requests FOR SELECT

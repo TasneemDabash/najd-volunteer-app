@@ -67,8 +67,9 @@ BEGIN
 END;
 $$;
 
--- 7) Volunteer: list own chat messages
+-- 7) Volunteer: list own chat messages (NO coordinator check - volunteers can read their OWN thread)
 DROP FUNCTION IF EXISTS public.list_my_support_chat();
+DROP FUNCTION IF EXISTS public.list_my_support_chat(uuid);
 CREATE OR REPLACE FUNCTION public.list_my_support_chat()
 RETURNS TABLE (
   id uuid,
@@ -85,9 +86,13 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
+  -- Only check if user is authenticated - NO coordinator check needed
+  -- Volunteers should be able to read their OWN chat thread
   IF auth.uid() IS NULL THEN
     RAISE EXCEPTION 'not authenticated' USING ERRCODE = '28000';
   END IF;
+
+  -- Return only messages where the current user IS the volunteer (their own thread)
   RETURN QUERY
   SELECT m.id, m.thread_volunteer_id, m.sender_id, m.body,
          m.media_type, m.media_url, m.duration_ms, m.created_at
@@ -133,9 +138,9 @@ $$;
 REVOKE ALL ON FUNCTION public.list_support_chat_thread(uuid) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.list_support_chat_thread(uuid) TO authenticated;
 
--- 9) Volunteer: send a message in their own thread
-DROP FUNCTION IF EXISTS public.volunteer_send_support_chat(text);
-CREATE OR REPLACE FUNCTION public.volunteer_send_support_chat(p_body text)
+-- 9) Volunteer: send a message in their own thread (used by service)
+DROP FUNCTION IF EXISTS public.submit_support_message(text);
+CREATE OR REPLACE FUNCTION public.submit_support_message(p_body text)
 RETURNS uuid
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -147,10 +152,41 @@ BEGIN
   IF auth.uid() IS NULL THEN
     RAISE EXCEPTION 'not authenticated' USING ERRCODE = '28000';
   END IF;
+
+  IF p_body IS NULL OR length(trim(p_body)) < 1 THEN
+    RAISE EXCEPTION 'message cannot be empty' USING ERRCODE = '22023';
+  END IF;
+
   INSERT INTO public.support_chat_messages (thread_volunteer_id, sender_id, body)
-  VALUES (auth.uid(), auth.uid(), p_body)
+  VALUES (auth.uid(), auth.uid(), trim(p_body))
   RETURNING id INTO v_id;
+
+  -- Notify admins/support about new message
+  INSERT INTO public.notifications (user_id, title, body, type)
+  SELECT pr.id,
+         'New message from a volunteer',
+         left(trim(p_body), 200),
+         'support_message'
+  FROM public.profiles pr
+  WHERE lower(trim(coalesce(pr.role::text, ''))) IN ('admin', 'support');
+
   RETURN v_id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.submit_support_message(text) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.submit_support_message(text) TO authenticated;
+
+-- Also create alias function
+DROP FUNCTION IF EXISTS public.volunteer_send_support_chat(text);
+CREATE OR REPLACE FUNCTION public.volunteer_send_support_chat(p_body text)
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN public.submit_support_message(p_body);
 END;
 $$;
 
