@@ -7,5 +7,4 @@
 "NSPhotoLibraryUsageDescription" = "Najd needs access to your photo library to share images related to tasks.";
 "NSPhotoLibraryAddUsageDescription" = "Najd needs permission to save photos to your library.";
 "NSContactsUsageDescription" = "Najd may access contacts to help you invite other volunteers.";
-"NSUserTrackingUsageDescription" = "We use this to improve your experience and show relevant content.";
 "CFBundleDisplayName" = "Najd";

@@ -7,5 +7,4 @@
 "NSPhotoLibraryUsageDescription" = "يحتاج نجد الوصول لمكتبة الصور لمشاركة صور متعلقة بالمهام.";
 "NSPhotoLibraryAddUsageDescription" = "يحتاج نجد إذن لحفظ الصور في مكتبتك.";
 "NSContactsUsageDescription" = "قد يصل نجد إلى جهات الاتصال لمساعدتك في دعوة متطوعين آخرين.";
-"NSUserTrackingUsageDescription" = "نستخدم هذا لتحسين تجربتك وعرض محتوى مناسب.";
 "CFBundleDisplayName" = "نجد";

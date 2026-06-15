@@ -42,8 +42,6 @@
 	<string>Najd needs permission to save photos to your library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Najd needs access to your photo library to share images related to tasks.</string>
-	<key>NSUserTrackingUsageDescription</key>
-	<string>We use this to improve your experience and show relevant content.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
