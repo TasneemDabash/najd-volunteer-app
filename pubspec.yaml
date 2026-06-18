@@ -1,7 +1,7 @@
 name: najd_volunteer
 description: Najd Volunteer - Volunteer Coordination Mobile App for iOS and Android.
 publish_to: 'none'
-version: 1.0.0+2
+version: 1.0.0+3
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -18,7 +18,7 @@ dependencies:
   url_launcher: ^6.2.4
   # Voice message recording / playback
   record: ^5.1.2
-  audioplayers: ^6.1.0
+  audioplayers: ^6.7.1
   path_provider: ^2.1.4
   permission_handler: ^11.3.1
 
@@ -26,6 +26,13 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.1
+  flutter_launcher_icons: ^0.14.3
+
+flutter_launcher_icons:
+  ios: true
+  android: true
+  image_path: "assets/icon/app_icon.png"
+  remove_alpha_ios: true
 
 # `record` 5.1.2 pins `record_linux: ^0.7.2`, which doesn't implement the
 # `startStream` method added in `record_platform_interface` 1.4.0+. Even though
