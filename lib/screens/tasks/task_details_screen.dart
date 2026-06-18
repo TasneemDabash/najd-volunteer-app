@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../config/theme.dart';
+import '../../l10n/app_strings.dart';
 import '../../models/task_model.dart';
 import '../../models/user_role.dart';
 import '../../models/volunteer.dart';
@@ -10,6 +11,7 @@ import '../../providers/auth_provider.dart';
 import '../../services/task_service.dart';
 import '../../services/volunteer_service.dart';
 import '../../widgets/animations.dart';
+import '../../widgets/skill_chip.dart';
 import '../volunteers/volunteer_profile_screen.dart';
 
 class TaskDetailsScreen extends StatefulWidget {
@@ -120,7 +122,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                               color: AppTheme.primary),
                           const SizedBox(width: 8),
                           const Text(
-                            'Assign volunteers',
+                            AppStrings.assignVolunteers,
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
@@ -129,15 +131,15 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                           const Spacer(),
                           if (originLat != null && originLon != null)
                             const Chip(
-                              label: Text('Closest first',
+                              label: Text(AppStrings.closestFirst,
                                   style: TextStyle(fontSize: 11)),
                               backgroundColor: Color(0xFFE0F2FE),
                             ),
                         ],
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        'Pick volunteers to assign. They will receive an in-app notification.',
+                      const Text(
+                        'اختر المتطوعين للتعيين. سيصلهم إشعار داخل التطبيق.',
                         style: TextStyle(
                           fontSize: 12,
                           color: AppTheme.textSecondary,
@@ -148,7 +150,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                       Expanded(
                         child: volunteers.isEmpty
                             ? const Center(
-                                child: Text('No volunteers available.'),
+                                child: Text(AppStrings.noVolunteersAvailable),
                               )
                             : ListView.builder(
                                 controller: scrollController,
@@ -182,7 +184,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                                           const Text('·',
                                               style: TextStyle(fontSize: 12)),
                                           Text(
-                                            '${v.distanceKm!.toStringAsFixed(1)} km',
+                                            '${v.distanceKm!.toStringAsFixed(1)} ${AppStrings.km}',
                                             style: const TextStyle(
                                               fontSize: 12,
                                               color: AppTheme.primary,
@@ -194,7 +196,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                                           const Text('·',
                                               style: TextStyle(fontSize: 12)),
                                           const Text(
-                                            'Online',
+                                            AppStrings.online,
                                             style: TextStyle(
                                               fontSize: 12,
                                               color: AppTheme.success,
@@ -206,7 +208,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                                           const Text('·',
                                               style: TextStyle(fontSize: 12)),
                                           const Text(
-                                            'Busy',
+                                            'مشغول',
                                             style: TextStyle(
                                               fontSize: 12,
                                               color: AppTheme.warning,
@@ -240,7 +242,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                             Expanded(
                               child: TextButton(
                                 onPressed: () => Navigator.pop(sheetCtx),
-                                child: const Text('Cancel'),
+                                child: const Text(AppStrings.cancel),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -260,7 +262,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
                                         const SnackBar(
-                                          content: Text('Assignment updated'),
+                                          content: Text(AppStrings.assignmentUpdated),
                                           backgroundColor: AppTheme.success,
                                           behavior: SnackBarBehavior.floating,
                                         ),
@@ -272,9 +274,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                                 },
                                 icon: const Icon(Icons.check_rounded),
                                 label: Text(
-                                  role == UserRole.support
-                                      ? 'Save'
-                                      : 'Save (${selected.length})',
+                                  '${AppStrings.save} (${selected.length})',
                                 ),
                               ),
                             ),
@@ -295,7 +295,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
   void _showError(Object e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Error: $e'),
+        content: Text('${AppStrings.errorPrefix} $e'),
         backgroundColor: AppTheme.error,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -318,14 +318,14 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
   Widget build(BuildContext context) {
     if (_loading) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Task')),
+        appBar: AppBar(title: const Text(AppStrings.taskDetails)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
     if (_task == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Task')),
-        body: const Center(child: Text('Task not found')),
+        appBar: AppBar(title: const Text(AppStrings.taskDetails)),
+        body: const Center(child: Text(AppStrings.taskNotFound)),
       );
     }
     final task = _task!;
@@ -336,7 +336,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: AppBar(
-        title: const Text('Task Details'),
+        title: const Text(AppStrings.taskDetails),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
@@ -352,7 +352,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                     child: ListTile(
                       leading: Icon(Icons.play_arrow_rounded,
                           color: AppTheme.warning),
-                      title: Text('Mark active'),
+                      title: Text(AppStrings.markActive),
                     ),
                   ),
                 const PopupMenuItem(
@@ -360,7 +360,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                   child: ListTile(
                     leading: Icon(Icons.check_circle_rounded,
                         color: AppTheme.success),
-                    title: Text('Mark completed'),
+                    title: Text(AppStrings.markCompleted),
                   ),
                 ),
                 if (isCoordinator && task.status != TaskStatus.pending)
@@ -368,7 +368,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                     value: TaskStatus.pending,
                     child: ListTile(
                       leading: Icon(Icons.refresh, color: AppTheme.textLight),
-                      title: Text('Mark pending'),
+                      title: Text(AppStrings.markPending),
                     ),
                   ),
               ],
@@ -435,57 +435,29 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                     const SizedBox(height: 16),
                     _MetaRow(
                       icon: Icons.place_rounded,
-                      label: 'Location',
+                      label: AppStrings.location,
                       value: task.displayLocation.isEmpty
-                          ? 'Not set'
+                          ? AppStrings.notSet
                           : task.displayLocation,
                     ),
                     _MetaRow(
                       icon: Icons.event_rounded,
-                      label: 'Scheduled',
-                      value: DateFormat.yMMMMd().add_jm().format(task.date),
+                      label: AppStrings.scheduled,
+                      value: DateFormat.yMMMMd('ar').add_jm().format(task.date),
                     ),
                     if (task.latitude != null && task.longitude != null)
                       _MetaRow(
                         icon: Icons.gps_fixed_rounded,
-                        label: 'Coordinates',
+                        label: AppStrings.coordinates,
                         value:
                             '${task.latitude!.toStringAsFixed(4)}, ${task.longitude!.toStringAsFixed(4)}',
                       ),
                     if (task.requiredSkills.isNotEmpty) ...[
                       const SizedBox(height: 12),
-                      const Text(
-                        'Required skills',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.textLight,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
-                        children: task.requiredSkills
-                            .map(
-                              (s) => Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 5),
-                                decoration: BoxDecoration(
-                                  color: AppTheme.surfaceLight,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Text(
-                                  s,
-                                  style: const TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppTheme.primary,
-                                  ),
-                                ),
-                              ),
-                            )
-                            .toList(),
+                      SkillSection(
+                        label: AppStrings.requiredSkills,
+                        skills: task.requiredSkills,
+                        compact: true,
                       ),
                     ],
                   ],
@@ -497,7 +469,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
               children: [
                 Expanded(
                   child: Text(
-                    'Assigned volunteers (${_assigned.length})',
+                    '${AppStrings.assignedVolunteers} (${_assigned.length})',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
@@ -509,7 +481,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                   TextButton.icon(
                     onPressed: () => _openAssignSheet(role: role),
                     icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
-                    label: Text(_assigned.isEmpty ? 'Assign' : 'Edit'),
+                    label: Text(_assigned.isEmpty ? AppStrings.assign : AppStrings.edit),
                   ),
               ],
             ),
@@ -523,7 +495,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                   boxShadow: AppTheme.cardShadow,
                 ),
                 child: const Text(
-                  'No volunteers assigned yet.',
+                  AppStrings.noVolunteersAssigned,
                   style: TextStyle(color: AppTheme.textSecondary),
                 ),
               )
@@ -564,7 +536,7 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                             ),
                           ),
                           const SizedBox(width: 6),
-                          const Text('Online',
+                          const Text(AppStrings.online,
                               style: TextStyle(
                                 fontSize: 12,
                                 color: AppTheme.success,
@@ -626,7 +598,7 @@ class _MetaRow extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: AppTheme.textLight,
+                color: AppTheme.textSecondary,
               ),
             ),
           ),

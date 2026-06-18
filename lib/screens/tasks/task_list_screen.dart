@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+
 import '../../config/theme.dart';
+import '../../l10n/app_strings.dart';
 import '../../models/task_model.dart';
+import '../../models/user_role.dart';
+import '../../providers/auth_provider.dart';
 import '../../services/task_service.dart';
 import '../../widgets/animations.dart';
-import 'task_details_screen.dart';
 import 'create_task_screen.dart';
+import 'task_details_screen.dart';
+import 'task_publish_requests_screen.dart';
+import 'task_templates_screen.dart';
 
 class TaskListScreen extends StatefulWidget {
-  const TaskListScreen({super.key});
+  const TaskListScreen({super.key, this.initialStatus});
+
+  final TaskStatus? initialStatus;
 
   @override
   State<TaskListScreen> createState() => _TaskListScreenState();
@@ -23,6 +32,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
   @override
   void initState() {
     super.initState();
+    _filterStatus = widget.initialStatus;
     _load();
   }
 
@@ -35,7 +45,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text('${AppStrings.errorPrefix} $e'),
             backgroundColor: AppTheme.error,
             behavior: SnackBarBehavior.floating,
             shape:
@@ -71,13 +81,40 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final role = context.watch<AuthProvider>().role;
+    final isCoordinator =
+        role == UserRole.admin || role == UserRole.support;
+
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: AppBar(
-        title: const Text('Tasks'),
+        title: const Text(AppStrings.tasks),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
+          if (isCoordinator)
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert_rounded),
+              onSelected: (v) {
+                final page = v == 'templates'
+                    ? const TaskTemplatesScreen()
+                    : const TaskPublishRequestsScreen();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => page),
+                );
+              },
+              itemBuilder: (_) => const [
+                PopupMenuItem(
+                  value: 'templates',
+                  child: Text(AppStrings.manageTemplates),
+                ),
+                PopupMenuItem(
+                  value: 'requests',
+                  child: Text(AppStrings.publishRequests),
+                ),
+              ],
+            ),
           Padding(
             padding: const EdgeInsets.only(right: 8),
             child: IconButton(
@@ -107,7 +144,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
               child: Row(
                 children: [
                   _ModernFilterChip(
-                    label: 'All',
+                    label: AppStrings.all,
                     selected: _filterStatus == null,
                     onTap: () => setState(() {
                       _filterStatus = null;
@@ -152,7 +189,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              'No tasks found',
+                              'لا توجد مهام',
                               style: TextStyle(
                                 fontSize: 16,
                                 color: AppTheme.textSecondary,

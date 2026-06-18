@@ -1,6 +1,10 @@
 /// App configuration and environment variables.
-/// Replace the values below with your real Supabase project URL and anon key
-/// from: Supabase Dashboard → Project Settings → API.
+///
+/// For production store builds, pass credentials via `--dart-define`:
+/// ```bash
+/// flutter build appbundle --dart-define=SUPABASE_URL=https://xxx.supabase.co --dart-define=SUPABASE_ANON_KEY=your_anon_key
+/// flutter build ipa --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...
+/// ```
 class AppConfig {
   static const String supabaseUrl = String.fromEnvironment(
     'SUPABASE_URL',

@@ -4,9 +4,20 @@ import '../../config/theme.dart';
 import '../../models/user_profile.dart';
 import '../../models/user_role.dart';
 import '../../services/account_service.dart';
+import '../../services/task_service.dart';
+import '../../services/volunteer_service.dart';
 import '../../widgets/animations.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/modern_bottom_nav.dart';
+import '../../navigation/coordinator_shell_intent.dart';
+import '../dashboard_screen.dart';
+import '../notifications_screen.dart';
+import '../settings_screen.dart';
+import '../tasks/task_list_screen.dart';
+import '../admin/role_requests_screen.dart';
+import '../tasks/task_publish_requests_screen.dart';
+import '../tasks/task_templates_screen.dart';
+import '../volunteers/volunteer_list_screen.dart';
 import 'coordinator_shell_tabs.dart';
 
 /// Shell for [UserRole.admin]. Same coordinator tabs as support (overview, volunteers,
@@ -19,15 +30,30 @@ class AdminLayout extends StatefulWidget {
 }
 
 class _AdminLayoutState extends State<AdminLayout> {
-  int _index = 0;
+  int _index = CoordinatorTab.overview;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  Widget _volunteersPage =
+      const VolunteerListScreen(key: ValueKey('tab_volunteers'));
+  Widget _tasksPage = const TaskListScreen(key: ValueKey('tab_tasks'));
 
-  late final List<Widget> _pages;
+  void _openAdminDrawer() => _scaffoldKey.currentState?.openDrawer();
 
-  @override
-  void initState() {
-    super.initState();
-    _pages = buildCoordinatorShellTabPages();
+  void _switchTab(int index) {
+    final skill = CoordinatorShellIntent.consumeVolunteerSkillFilter();
+    final taskStatus = CoordinatorShellIntent.consumeTaskStatusFilter();
+    if (skill != null) {
+      _volunteersPage = VolunteerListScreen(
+        key: ValueKey('tab_volunteers_$skill'),
+        initialSkillFilter: skill,
+      );
+    }
+    if (taskStatus != null) {
+      _tasksPage = TaskListScreen(
+        key: ValueKey('tab_tasks_${taskStatus.name}'),
+        initialStatus: taskStatus,
+      );
+    }
+    setState(() => _index = index);
   }
 
   @override
@@ -41,15 +67,31 @@ class _AdminLayoutState extends State<AdminLayout> {
         elevation: 3,
         backgroundColor: AppTheme.primary,
         foregroundColor: Colors.white,
-        tooltip: 'Administration',
-        onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        tooltip: 'أدوات الإدارة',
+        onPressed: _openAdminDrawer,
         child: const Icon(Icons.admin_panel_settings_outlined),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-      body: SafeArea(child: _pages[_index]),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      body: SafeArea(
+        child: IndexedStack(
+          index: _index,
+          children: [
+            DashboardScreen(
+              key: const ValueKey('tab_overview'),
+              onSwitchTab: _switchTab,
+              onOpenAdminTools: _openAdminDrawer,
+              showAdminToolsButton: true,
+            ),
+            _volunteersPage,
+            _tasksPage,
+            const NotificationsScreen(key: ValueKey('tab_alerts')),
+            const SettingsScreen(key: ValueKey('tab_settings')),
+          ],
+        ),
+      ),
       bottomNavigationBar: ModernBottomNav(
         currentIndex: _index,
-        onTap: (i) => setState(() => _index = i),
+        onTap: _switchTab,
         items: kCoordinatorShellNavItems,
       ),
     );
@@ -98,7 +140,7 @@ class _AdminToolsDrawer extends StatelessWidget {
                   ),
                   const SizedBox(height: 14),
                   const Text(
-                    'Administration',
+                    'الإدارة',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 22,
@@ -107,7 +149,7 @@ class _AdminToolsDrawer extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Users, roles & platform tools',
+                    'المستخدمون والأدوار وأدوات المنصة',
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.88),
                       fontSize: 13,
@@ -118,39 +160,57 @@ class _AdminToolsDrawer extends StatelessWidget {
               ),
             ),
             ListTile(
+              leading: const Icon(Icons.library_books_outlined, color: AppTheme.primary),
+              title: const Text('قوالب المهام'),
+              subtitle: const Text('مهام دائمة ومقترحة'),
+              onTap: () => _push(context, const TaskTemplatesScreen()),
+            ),
+            ListTile(
+              leading: const Icon(Icons.pending_actions_outlined, color: AppTheme.primary),
+              title: const Text('طلبات نشر المهام'),
+              subtitle: const Text('مراجعة طلبات المتطوعين'),
+              onTap: () => _push(context, const TaskPublishRequestsScreen()),
+            ),
+            ListTile(
+              leading: const Icon(Icons.upgrade_outlined, color: AppTheme.primary),
+              title: const Text('طلبات ترقية الأدوار'),
+              subtitle: const Text('قبول أو رفض طلبات الدعم/الإدارة'),
+              onTap: () => _push(context, const AdminRoleRequestsScreen()),
+            ),
+            ListTile(
               leading: const Icon(Icons.groups_outlined, color: AppTheme.primary),
-              title: const Text('User management'),
-              subtitle: const Text('Roles & account status'),
+              title: const Text('إدارة المستخدمين'),
+              subtitle: const Text('الأدوار وحالة الحساب'),
               onTap: () => _push(context, const _UserManagementScreen()),
             ),
             ListTile(
               leading: const Icon(Icons.admin_panel_settings_outlined, color: AppTheme.primary),
-              title: const Text('Roles & policy'),
-              subtitle: const Text('How access works'),
+              title: const Text('الأدوار والسياسات'),
+              subtitle: const Text('كيف يعمل الوصول'),
               onTap: () => _push(context, const _RoleManagementScreen()),
             ),
             ListTile(
               leading: const Icon(Icons.support_agent_outlined, color: AppTheme.primary),
-              title: const Text('Support team'),
-              subtitle: const Text('Coordinators & accounts'),
+              title: const Text('فريق الدعم'),
+              subtitle: const Text('المنسقون والحسابات'),
               onTap: () => _push(context, const _SupportTeamManagementScreen()),
             ),
             ListTile(
               leading: const Icon(Icons.tune_outlined, color: AppTheme.primary),
-              title: const Text('System'),
-              subtitle: const Text('Platform notes'),
+              title: const Text('النظام'),
+              subtitle: const Text('ملاحظات المنصة'),
               onTap: () => _push(context, const _SystemSettingsScreen()),
             ),
             ListTile(
               leading: const Icon(Icons.analytics_outlined, color: AppTheme.primary),
-              title: const Text('Reports'),
-              subtitle: const Text('Coming soon'),
+              title: const Text('التقارير'),
+              subtitle: const Text('إحصائيات الاستخدام'),
               onTap: () => _push(context, const _ReportsScreen()),
             ),
             const Divider(height: 1),
             ListTile(
               leading: Icon(Icons.close, color: AppTheme.textSecondary.withOpacity(0.8)),
-              title: const Text('Close'),
+              title: const Text('إغلاق'),
               onTap: onClose,
             ),
           ],
@@ -635,28 +695,159 @@ class _SystemSettingsScreen extends StatelessWidget {
   }
 }
 
-class _ReportsScreen extends StatelessWidget {
+class _ReportsScreen extends StatefulWidget {
   const _ReportsScreen();
 
   @override
+  State<_ReportsScreen> createState() => _ReportsScreenState();
+}
+
+class _ReportsScreenState extends State<_ReportsScreen> {
+  final _volunteerService = VolunteerService();
+  final _taskService = TaskService();
+  final _accountService = AccountService();
+
+  int _volunteers = 0;
+  int _activeTasks = 0;
+  int _completedTasks = 0;
+  int _users = 0;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() => _loading = true);
+    try {
+      final v = await _volunteerService.getVolunteersCount(coordinatorView: true);
+      final active = await _taskService.getActiveTasksCount();
+      final completed = await _taskService.getCompletedTasksCount();
+      final users = await _accountService.fetchAllProfilesForManagement();
+      if (mounted) {
+        setState(() {
+          _volunteers = v;
+          _activeTasks = active;
+          _completedTasks = completed;
+          _users = users.length;
+          _loading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return _AdminInfoScaffold(
-      title: 'Reports',
-      heroSubtitle: 'Usage and operations',
-      heroIcon: Icons.analytics_rounded,
-      heroGradient: AppTheme.cardGradient,
-      sections: const [
-        _InfoBlock(
-          title: 'Insights',
-          body:
-              'Volunteer counts, task throughput, and support activity can be summarized here once reporting queries are wired up.',
-        ),
-        _InfoBlock(
-          title: 'Export',
-          body:
-              'Later you can add CSV export or links to Supabase SQL saved reports.',
-        ),
-      ],
+    return Scaffold(
+      backgroundColor: AppTheme.background,
+      appBar: AppBar(
+        title: const Text('التقارير'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: _load,
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                children: [
+                  _ReportStatCard(
+                    label: 'إجمالي الحسابات',
+                    value: '$_users',
+                    icon: Icons.groups_outlined,
+                    gradient: AppTheme.purpleGradient,
+                  ),
+                  const SizedBox(height: 12),
+                  _ReportStatCard(
+                    label: 'المتطوعون',
+                    value: '$_volunteers',
+                    icon: Icons.people_outline,
+                    gradient: AppTheme.primaryGradient,
+                  ),
+                  const SizedBox(height: 12),
+                  _ReportStatCard(
+                    label: 'المهام النشطة',
+                    value: '$_activeTasks',
+                    icon: Icons.assignment_outlined,
+                    gradient: AppTheme.warningGradient,
+                  ),
+                  const SizedBox(height: 12),
+                  _ReportStatCard(
+                    label: 'المهام المكتملة',
+                    value: '$_completedTasks',
+                    icon: Icons.check_circle_outline,
+                    gradient: AppTheme.successGradient,
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'يتم تحديث الأرقام من قاعدة البيانات مباشرة. اسحب للأسفل للتحديث.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppTheme.textSecondary,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+    );
+  }
+}
+
+class _ReportStatCard extends StatelessWidget {
+  const _ReportStatCard({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.gradient,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+  final LinearGradient gradient;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.white, size: 28),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.white.withOpacity(0.9),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

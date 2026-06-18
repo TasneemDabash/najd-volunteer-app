@@ -111,16 +111,12 @@
   "permissions_required": {
     "ios": {
       "NSCameraUsageDescription": "Video calls with support team",
-      "NSMicrophoneUsageDescription": "Voice messages and calls",
-      "NSLocationWhenInUseUsageDescription": "Match with nearby tasks",
-      "NSPhotoLibraryUsageDescription": "Share task-related images"
+      "NSMicrophoneUsageDescription": "Voice messages and calls"
     },
     "android": {
       "CAMERA": "Video calls with support team",
       "RECORD_AUDIO": "Voice messages and calls",
-      "ACCESS_FINE_LOCATION": "Match with nearby tasks",
-      "READ_MEDIA_IMAGES": "Share task-related images",
-      "POST_NOTIFICATIONS": "Receive task notifications"
+      "INTERNET": "App connectivity"
     }
   }
 }
