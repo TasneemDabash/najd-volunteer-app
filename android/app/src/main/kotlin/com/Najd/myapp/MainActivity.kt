@@ -1,4 +1,4 @@
-package sa.najd.volunteer
+package com.Najd.myapp
 
 import io.flutter.embedding.android.FlutterActivity
 
