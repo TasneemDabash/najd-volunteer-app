@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../config/theme.dart';
+import '../../l10n/app_strings.dart';
 import '../../models/task_model.dart';
 import '../../services/task_service.dart';
 import '../../widgets/animations.dart';
+import '../../widgets/skill_chip.dart';
+import 'request_task_publish_screen.dart';
 import 'task_details_screen.dart';
 
 /// Volunteer-side replacement of the old placeholder tasks tab.
@@ -74,9 +77,21 @@ class _VolunteerTasksScreenState extends State<VolunteerTasksScreen> {
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: AppBar(
-        title: const Text('My Tasks'),
+        title: const Text(AppStrings.myTasks),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          IconButton(
+            tooltip: AppStrings.requestPublishTask,
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const RequestTaskPublishScreen(),
+              ),
+            ),
+            icon: const Icon(Icons.send_outlined),
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -86,7 +101,7 @@ class _VolunteerTasksScreenState extends State<VolunteerTasksScreen> {
             child: Row(
               children: [
                 _FilterChipPill(
-                  label: 'All',
+                  label: AppStrings.all,
                   selected: _filter == null,
                   onTap: () => setState(() => _filter = null),
                 ),
@@ -222,7 +237,7 @@ class _MyTaskCard extends StatelessWidget {
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        loc.isEmpty ? 'Location TBD' : loc,
+                        loc.isEmpty ? AppStrings.notSet : loc,
                         style: const TextStyle(
                           fontSize: 12,
                           color: AppTheme.textSecondary,
@@ -245,28 +260,7 @@ class _MyTaskCard extends StatelessWidget {
                 ),
                 if (task.requiredSkills.isNotEmpty) ...[
                   const SizedBox(height: 10),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: task.requiredSkills.take(4).map((s) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
-                        decoration: BoxDecoration(
-                          color: AppTheme.surfaceLight,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          s,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.primary,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
+                  SkillSection(skills: task.requiredSkills, compact: true),
                 ],
               ],
             ),
@@ -326,8 +320,8 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final msg = filter == null
-        ? 'No tasks assigned to you yet.\nCheck back later or contact support.'
-        : 'No ${filter!.displayName.toLowerCase()} tasks right now.';
+        ? 'لا توجد مهام معيّنة لك بعد.\nتحقق لاحقاً أو تواصل مع الدعم.'
+        : 'لا توجد مهام ${filter!.displayName} حالياً.';
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -382,7 +376,7 @@ class _ErrorState extends StatelessWidget {
                   const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
             ),
             const SizedBox(height: 16),
-            ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
+            ElevatedButton(onPressed: onRetry, child: const Text(AppStrings.retry)),
           ],
         ),
       ),

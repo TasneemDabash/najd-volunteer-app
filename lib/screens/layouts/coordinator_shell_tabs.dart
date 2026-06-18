@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../models/task_model.dart';
+import '../../navigation/coordinator_shell_intent.dart';
 import '../../widgets/modern_bottom_nav.dart';
-import '../dashboard_screen.dart';
-import '../notifications_screen.dart';
-import '../settings_screen.dart';
-import '../tasks/task_list_screen.dart';
-import '../volunteers/volunteer_list_screen.dart';
 
-/// Bottom tabs + pages shared by [SupportLayout] and [AdminLayout]
-/// (coordinator-facing: overview, volunteers, tasks, alerts, settings).
+/// Bottom tabs shared by [SupportLayout] and [AdminLayout].
 const List<ModernBottomNavItem> kCoordinatorShellNavItems = [
   ModernBottomNavItem(
     icon: Icons.dashboard_outlined,
@@ -37,12 +33,18 @@ const List<ModernBottomNavItem> kCoordinatorShellNavItems = [
   ),
 ];
 
-List<Widget> buildCoordinatorShellTabPages() {
-  return const [
-    DashboardScreen(),
-    VolunteerListScreen(),
-    TaskListScreen(),
-    NotificationsScreen(),
-    SettingsScreen(),
-  ];
+/// Applies optional filters then switches coordinator tabs from the dashboard.
+void coordinatorSwitchTab(
+  void Function(int tabIndex)? onSwitchTab,
+  int tabIndex, {
+  String? volunteerSkillFilter,
+  TaskStatus? taskStatus,
+}) {
+  if (volunteerSkillFilter != null) {
+    CoordinatorShellIntent.setVolunteerSkillFilter(volunteerSkillFilter);
+  }
+  if (taskStatus != null) {
+    CoordinatorShellIntent.setTaskStatusFilter(taskStatus);
+  }
+  onSwitchTab?.call(tabIndex);
 }

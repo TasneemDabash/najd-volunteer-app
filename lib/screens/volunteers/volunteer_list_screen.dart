@@ -15,7 +15,10 @@ import 'volunteer_profile_screen.dart';
 enum SortOption { newest, alphabetical, city, distance }
 
 class VolunteerListScreen extends StatefulWidget {
-  const VolunteerListScreen({super.key});
+  const VolunteerListScreen({super.key, this.initialSkillFilter});
+
+  /// Pre-select skill filter (e.g. when opened from dashboard service card).
+  final String? initialSkillFilter;
 
   @override
   State<VolunteerListScreen> createState() => _VolunteerListScreenState();
@@ -44,6 +47,7 @@ class _VolunteerListScreenState extends State<VolunteerListScreen> {
   @override
   void initState() {
     super.initState();
+    _filterSkill = widget.initialSkillFilter;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _load();
     });

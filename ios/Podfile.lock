@@ -1,54 +1,22 @@
 PODS:
-  - app_links (7.0.0):
-    - Flutter
-  - audioplayers_darwin (0.0.1):
-    - Flutter
-    - FlutterMacOS
   - Flutter (1.0.0)
-  - permission_handler_apple (9.4.8):
-    - Flutter
   - record_darwin (1.0.0):
-    - Flutter
-  - shared_preferences_foundation (0.0.1):
-    - Flutter
-    - FlutterMacOS
-  - url_launcher_ios (0.0.1):
     - Flutter
 
 DEPENDENCIES:
-  - app_links (from `.symlinks/plugins/app_links/ios`)
-  - audioplayers_darwin (from `.symlinks/plugins/audioplayers_darwin/darwin`)
   - Flutter (from `Flutter`)
-  - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - record_darwin (from `.symlinks/plugins/record_darwin/ios`)
-  - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
-  - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
 
 EXTERNAL SOURCES:
-  app_links:
-    :path: ".symlinks/plugins/app_links/ios"
-  audioplayers_darwin:
-    :path: ".symlinks/plugins/audioplayers_darwin/darwin"
   Flutter:
     :path: Flutter
-  permission_handler_apple:
-    :path: ".symlinks/plugins/permission_handler_apple/ios"
   record_darwin:
     :path: ".symlinks/plugins/record_darwin/ios"
-  shared_preferences_foundation:
-    :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
-  url_launcher_ios:
-    :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
-  app_links: a754cbec3c255bd4bbb4d236ecc06f28cd9a7ce8
-  audioplayers_darwin: 835ced6edd4c9fc8ebb0a7cc9e294a91d99917d5
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  permission_handler_apple: 92d754bbaa7361d436db2d6c3c1c2a0fdcec462e
   record_darwin: fb1f375f1d9603714f55b8708a903bbb91ffdb0a
-  shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
-  url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
 
-PODFILE CHECKSUM: e55ce097b8cf909aebc284705328a6ca353b279f
+PODFILE CHECKSUM: 249be151c520ea9c49375b00a6c99a67cc1e8958
 
 COCOAPODS: 1.16.2

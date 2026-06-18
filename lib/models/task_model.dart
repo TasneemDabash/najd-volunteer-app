@@ -8,11 +8,11 @@ enum TaskStatus {
   String get displayName {
     switch (this) {
       case TaskStatus.pending:
-        return 'Pending';
+        return 'قيد الانتظار';
       case TaskStatus.active:
-        return 'Active';
+        return 'نشطة';
       case TaskStatus.completed:
-        return 'Completed';
+        return 'مكتملة';
     }
   }
 

@@ -5,9 +5,9 @@
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<string>ar</string>
 	<key>CFBundleDisplayName</key>
-	<string>Najd</string>
+	<string>نجد للتطوع</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>najd</string>
+	<string>نجد للتطوع</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -29,19 +29,9 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Najd uses the camera for video calls between volunteers and support.</string>
-	<key>NSContactsUsageDescription</key>
-	<string>Najd may access contacts to help you invite other volunteers.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Najd uses your location to match you with nearby incidents and tasks.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Najd uses your location to match you with nearby incidents and tasks.</string>
+	<string>يستخدم التطبيق الكاميرا لمكالمات الفيديو بين المتطوعين وفريق الدعم.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Najd uses the microphone for voice messages and voice/video calls between volunteers and support.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Najd needs permission to save photos to your library.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Najd needs access to your photo library to share images related to tasks.</string>
+	<string>يستخدم التطبيق الميكروفون للرسائل الصوتية ومكالمات الصوت والفيديو.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
@@ -51,8 +41,6 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
