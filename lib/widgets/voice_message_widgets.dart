@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
@@ -211,11 +211,9 @@ class _VoiceMessagePlayerState extends State<VoiceMessagePlayer> {
   late final AudioPlayer _player;
   Duration _position = Duration.zero;
   Duration _duration = Duration.zero;
-  PlayerState _state = PlayerState.stopped;
+  bool _isPlaying = false;
   StreamSubscription? _posSub;
-  StreamSubscription? _durSub;
   StreamSubscription? _stateSub;
-  StreamSubscription? _completeSub;
 
   @override
   void initState() {
@@ -224,43 +222,46 @@ class _VoiceMessagePlayerState extends State<VoiceMessagePlayer> {
     if (widget.durationMs != null) {
       _duration = Duration(milliseconds: widget.durationMs!);
     }
-    _posSub = _player.onPositionChanged.listen((p) {
+    _posSub = _player.positionStream.listen((p) {
       if (!mounted) return;
       setState(() => _position = p);
     });
-    _durSub = _player.onDurationChanged.listen((d) {
-      if (!mounted) return;
-      setState(() => _duration = d);
-    });
-    _stateSub = _player.onPlayerStateChanged.listen((s) {
-      if (!mounted) return;
-      setState(() => _state = s);
-    });
-    _completeSub = _player.onPlayerComplete.listen((_) {
+    _stateSub = _player.playerStateStream.listen((state) {
       if (!mounted) return;
       setState(() {
-        _state = PlayerState.stopped;
-        _position = Duration.zero;
+        _isPlaying = state.playing;
+        if (state.processingState == ProcessingState.completed) {
+          _isPlaying = false;
+          _position = Duration.zero;
+          _player.seek(Duration.zero);
+          _player.pause();
+        }
       });
+      // Update duration when loaded
+      final dur = _player.duration;
+      if (dur != null && dur.inMilliseconds > 0) {
+        setState(() => _duration = dur);
+      }
     });
   }
 
   @override
   void dispose() {
     _posSub?.cancel();
-    _durSub?.cancel();
     _stateSub?.cancel();
-    _completeSub?.cancel();
     _player.dispose();
     super.dispose();
   }
 
   Future<void> _toggle() async {
     try {
-      if (_state == PlayerState.playing) {
+      if (_isPlaying) {
         await _player.pause();
       } else {
-        await _player.play(UrlSource(widget.url));
+        if (_player.audioSource == null) {
+          await _player.setUrl(widget.url);
+        }
+        await _player.play();
       }
     } catch (e) {
       if (!mounted) return;
@@ -297,7 +298,7 @@ class _VoiceMessagePlayerState extends State<VoiceMessagePlayer> {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              _state == PlayerState.playing
+              _isPlaying
                   ? Icons.pause_rounded
                   : Icons.play_arrow_rounded,
               color: widget.onTint,
