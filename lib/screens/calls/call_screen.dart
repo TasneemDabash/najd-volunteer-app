@@ -60,8 +60,10 @@ class _CallScreenState extends State<CallScreen> {
           _session.status == CallStatus.declined ||
           _session.status == CallStatus.cancelled ||
           _session.status == CallStatus.missed) {
-        Future.delayed(const Duration(milliseconds: 600), () {
-          if (mounted) Navigator.maybePop(context);
+        Future.delayed(const Duration(milliseconds: 1200), () {
+          if (mounted && Navigator.canPop(context)) {
+            Navigator.of(context).pop();
+          }
         });
       }
     });
@@ -160,9 +162,13 @@ class _CallScreenState extends State<CallScreen> {
   @override
   Widget build(BuildContext context) {
     final isVideo = _session.callType == CallType.video;
+    final isEnded = _session.status == CallStatus.ended ||
+        _session.status == CallStatus.declined ||
+        _session.status == CallStatus.cancelled ||
+        _session.status == CallStatus.missed;
     return PopScope(
-      canPop: false,
-      onPopInvoked: (didPop) async {
+      canPop: isEnded,
+      onPopInvokedWithResult: (didPop, _) async {
         if (didPop) return;
         await _hangUp();
       },
