@@ -13,6 +13,7 @@ import '../../navigation/coordinator_shell_intent.dart';
 import '../dashboard_screen.dart';
 import '../notifications_screen.dart';
 import '../settings_screen.dart';
+import '../support_inbox_screen.dart';
 import '../tasks/task_list_screen.dart';
 import '../admin/role_requests_screen.dart';
 import '../tasks/task_publish_requests_screen.dart';
@@ -84,7 +85,11 @@ class _AdminLayoutState extends State<AdminLayout> {
             ),
             _volunteersPage,
             _tasksPage,
-            const NotificationsScreen(key: ValueKey('tab_alerts')),
+            const SupportInboxScreen(key: ValueKey('tab_messages')),
+            NotificationsScreen(
+              key: const ValueKey('tab_notifications'),
+              onSwitchTab: _switchTab,
+            ),
             const SettingsScreen(key: ValueKey('tab_settings')),
           ],
         ),

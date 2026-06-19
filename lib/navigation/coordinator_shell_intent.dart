@@ -33,6 +33,10 @@ abstract final class CoordinatorTab {
   static const int overview = 0;
   static const int volunteers = 1;
   static const int tasks = 2;
-  static const int alerts = 3;
-  static const int settings = 4;
+  static const int messages = 3;
+  static const int notifications = 4;
+  static const int settings = 5;
+
+  /// Legacy alias — use [notifications].
+  static const int alerts = notifications;
 }

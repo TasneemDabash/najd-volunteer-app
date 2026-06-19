@@ -3,9 +3,12 @@ import 'package:flutter/gestures.dart';
 import 'package:provider/provider.dart';
 import '../../config/app_config.dart';
 import '../../config/theme.dart';
+import '../../models/app_location.dart';
 import '../../providers/auth_provider.dart';
+import '../../widgets/location_picker.dart';
 import '../legal/privacy_policy_screen.dart';
 import '../legal/terms_of_service_screen.dart';
+import 'complete_volunteer_profile_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -25,35 +28,12 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
   bool _acceptedTerms = false;
-  String? _selectedCity;
+  AppLocation? _selectedLocation;
   int _currentStep = 0;
 
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-
-  final List<String> _saudiCities = [
-    'الرياض',
-    'جدة',
-    'مكة المكرمة',
-    'المدينة المنورة',
-    'الدمام',
-    'الخبر',
-    'الظهران',
-    'الأحساء',
-    'الطائف',
-    'تبوك',
-    'بريدة',
-    'خميس مشيط',
-    'حائل',
-    'نجران',
-    'جازان',
-    'ينبع',
-    'أبها',
-    'عرعر',
-    'سكاكا',
-    'القطيف',
-  ];
 
   @override
   void initState() {
@@ -94,8 +74,8 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
         _showError('الرجاء إدخال رقم الهاتف');
         return;
       }
-      if (_selectedCity == null) {
-        _showError('الرجاء اختيار المدينة');
+      if (_selectedLocation == null) {
+        _showError('الرجاء اختيار الموقع');
         return;
       }
     }
@@ -139,15 +119,24 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
     }
 
     final auth = context.read<AuthProvider>();
+    final email = _emailController.text.trim().toLowerCase();
+    final loc = _selectedLocation!;
     final ok = await auth.signUp(
-      _emailController.text.trim(),
+      email,
       _passwordController.text,
       fullName: _nameController.text.trim(),
       phone: _phoneController.text.trim(),
-      city: _selectedCity,
+      city: loc.displayName,
+      currentLocationId: loc.id,
+      latitude: loc.latitude,
+      longitude: loc.longitude,
     );
     if (ok && mounted) {
-      Navigator.of(context).pushReplacementNamed('/dashboard');
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => const CompleteVolunteerProfileScreen(),
+        ),
+      );
     }
   }
 
@@ -319,7 +308,7 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
             labelText: 'رقم الهاتف',
             hintText: '05xxxxxxxx',
             prefixIcon: const Icon(Icons.phone_outlined),
-            prefixText: '+966 ',
+            prefixText: '+970 ',
             filled: true,
             fillColor: AppTheme.surfaceLight,
             border: OutlineInputBorder(
@@ -330,29 +319,12 @@ class _SignupScreenState extends State<SignupScreen> with TickerProviderStateMix
         ),
         const SizedBox(height: 16),
 
-        // City Dropdown
-        DropdownButtonFormField<String>(
-          value: _selectedCity,
-          decoration: InputDecoration(
-            labelText: 'المدينة',
-            prefixIcon: const Icon(Icons.location_city_outlined),
-            filled: true,
-            fillColor: AppTheme.surfaceLight,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-          ),
-          items: _saudiCities.map((city) {
-            return DropdownMenuItem(
-              value: city,
-              child: Text(city),
-            );
-          }).toList(),
-          onChanged: (value) {
-            setState(() => _selectedCity = value);
-          },
-          hint: const Text('اختر مدينتك'),
+        // Location picker (Palestine / Israel controlled list)
+        LocationPicker(
+          selectedId: _selectedLocation?.id,
+          label: 'الموقع',
+          hint: 'اختر مدينتك',
+          onChanged: (loc) => setState(() => _selectedLocation = loc),
         ),
         const SizedBox(height: 32),
 

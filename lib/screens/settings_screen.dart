@@ -109,6 +109,55 @@ class SettingsScreen extends StatelessWidget {
           ),
           const Divider(),
           ListTile(
+            leading: Icon(Icons.delete_forever, color: AppTheme.error),
+            title: Text(
+              'حذف الحساب',
+              style: TextStyle(color: AppTheme.error),
+            ),
+            subtitle: const Text(
+              'حذف حسابك وبياناتك نهائياً (مطلوب لمتجر App Store)',
+              style: TextStyle(fontSize: 12),
+            ),
+            onTap: () async {
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text('حذف الحساب'),
+                  content: const Text(
+                    'هل أنت متأكد؟ سيتم حذف حسابك وبياناتك نهائياً ولا يمكن التراجع عن هذا الإجراء.',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: const Text('إلغاء'),
+                    ),
+                    FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppTheme.error,
+                      ),
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: const Text('حذف نهائي'),
+                    ),
+                  ],
+                ),
+              );
+              if (confirm != true || !context.mounted) return;
+              final ok = await auth.deleteAccount();
+              if (!context.mounted) return;
+              if (ok) {
+                Navigator.of(context)
+                    .pushNamedAndRemoveUntil('/login', (route) => false);
+              } else if (auth.error != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(auth.error!),
+                    backgroundColor: AppTheme.error,
+                  ),
+                );
+              }
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.logout),
             title: const Text('تسجيل الخروج'),
             onTap: () async {

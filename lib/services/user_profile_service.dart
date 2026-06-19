@@ -23,6 +23,9 @@ class UserProfileService {
     required List<String> skills,
     required List<String> availability,
     String? notes,
+    String? currentLocationId,
+    double? latitude,
+    double? longitude,
   }) async {
     final userId = currentUserId;
     if (userId == null) throw Exception('Not authenticated');
@@ -36,6 +39,9 @@ class UserProfileService {
       'availability': availability,
       'notes': notes,
       'updated_at': now,
+      if (currentLocationId != null) 'current_location_id': currentLocationId,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
     };
     await _client.from(_table).upsert(data, onConflict: 'id');
   }

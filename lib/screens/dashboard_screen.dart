@@ -189,7 +189,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                               _HeaderIconButton(
                                 icon: Icons.notifications_outlined,
                                 tooltip: 'التنبيهات',
-                                onTap: () => _goToTab(CoordinatorTab.alerts),
+                                onTap: () => _goToTab(CoordinatorTab.notifications),
                               ),
                               const SizedBox(width: 8),
                               _HeaderIconButton(
@@ -348,7 +348,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                                                 ),
                                               );
                                             }
-                                            _goToTab(CoordinatorTab.alerts);
+                                            _goToTab(CoordinatorTab.notifications);
                                           },
                                         ),
                                       ),
@@ -388,19 +388,20 @@ class _DashboardScreenState extends State<DashboardScreen>
                           children: [
                             Expanded(
                               child: _QuickActionButton(
-                                icon: Icons.assignment_outlined,
-                                label: 'كل المهام',
-                                gradient: AppTheme.cardGradient,
-                                onTap: () => _goToTab(CoordinatorTab.tasks),
+                                icon: Icons.chat_bubble_outline,
+                                label: 'المحادثات',
+                                gradient: AppTheme.pinkGradient,
+                                onTap: () => _goToTab(CoordinatorTab.messages),
                               ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: _QuickActionButton(
                                 icon: Icons.notifications_active_outlined,
-                                label: 'التنبيهات',
+                                label: 'الإشعارات',
                                 gradient: AppTheme.purpleGradient,
-                                onTap: () => _goToTab(CoordinatorTab.alerts),
+                                onTap: () =>
+                                    _goToTab(CoordinatorTab.notifications),
                               ),
                             ),
                           ],

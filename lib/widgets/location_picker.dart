@@ -77,7 +77,7 @@ class _LocationPickerState extends State<LocationPicker> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(_error ??
-              'No locations available. Ask an admin to seed the locations table.'),
+              'لا توجد مواقع. نفّذ supabase/migrate_locations_calls_voice.sql في Supabase.'),
           backgroundColor: AppTheme.warning,
           behavior: SnackBarBehavior.floating,
           shape:
@@ -148,7 +148,7 @@ class _LocationPickerState extends State<LocationPicker> {
                     const SizedBox(height: 2),
                     Text(
                       _loading
-                          ? 'Loading locations…'
+                          ? 'جاري التحميل…'
                           : (selected?.displayName ?? widget.hint),
                       style: TextStyle(
                         fontSize: 15,
@@ -253,7 +253,7 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
                   const Icon(Icons.place_rounded, color: AppTheme.primary),
                   const SizedBox(width: 8),
                   const Text(
-                    'Pick a location',
+                    'اختر الموقع',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -272,7 +272,7 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
                 controller: _search,
                 onChanged: (_) => setState(() {}),
                 decoration: const InputDecoration(
-                  hintText: 'Search by name or region',
+                  hintText: 'ابحث بالاسم أو المنطقة',
                   prefixIcon: Icon(Icons.search),
                 ),
               ),

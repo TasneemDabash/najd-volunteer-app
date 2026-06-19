@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../config/theme.dart';
+import '../models/app_location.dart';
 import '../models/volunteer.dart';
 import '../services/user_profile_service.dart';
 import '../widgets/animations.dart';
+import '../widgets/location_picker.dart';
 
 class MyProfileScreen extends StatefulWidget {
   const MyProfileScreen({super.key});
@@ -44,8 +46,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
         body: const Center(child: CircularProgressIndicator()),
       );
     }
-    if (_profile == null ||
-        (_profile!.fullName.isEmpty && _profile!.phone.isEmpty)) {
+    if (_profile == null || _profile!.fullName.isEmpty) {
       return Scaffold(
         backgroundColor: AppTheme.background,
         appBar: AppBar(
@@ -133,11 +134,47 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       );
     }
     final v = _profile!;
+    final needsSkills = v.skills.isEmpty || v.availability.isEmpty;
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: SingleChildScrollView(
         child: Column(
           children: [
+            if (needsSkills)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                child: Material(
+                  color: AppTheme.warning.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(14),
+                  child: InkWell(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const _MyProfileFormScreen()),
+                    ).then((_) => _load()),
+                    borderRadius: BorderRadius.circular(14),
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.info_outline, color: AppTheme.warning),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'أكمل مهاراتك وأوقات توفرك لتحصل على مهام مناسبة',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: AppTheme.textPrimary.withOpacity(0.85),
+                              ),
+                            ),
+                          ),
+                          const Icon(Icons.chevron_left, color: AppTheme.warning),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             // Gradient header with avatar
             SlideInAnimation(
               child: Container(
@@ -500,10 +537,11 @@ class _MyProfileFormScreenState extends State<_MyProfileFormScreen> {
   final UserProfileService _profileService = UserProfileService();
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _cityController = TextEditingController();
   final _notesController = TextEditingController();
   List<String> _skills = [];
   List<String> _availability = [];
+  String? _selectedLocationId;
+  AppLocation? _selectedLocation;
   bool _loading = false;
 
   @override
@@ -513,14 +551,18 @@ class _MyProfileFormScreenState extends State<_MyProfileFormScreen> {
   }
 
   Future<void> _loadExisting() async {
-    final v = await _profileService.getProfileAsVolunteer();
-    if (v != null && mounted) {
-      _nameController.text = v.fullName;
-      _phoneController.text = v.phone;
-      _cityController.text = v.city;
-      _notesController.text = v.notes ?? '';
-      _skills = List.from(v.skills);
-      _availability = List.from(v.availability);
+    final map = await _profileService.getProfile();
+    if (map != null && mounted) {
+      _nameController.text = map['full_name'] as String? ?? '';
+      _phoneController.text = map['phone'] as String? ?? '';
+      _notesController.text = map['notes'] as String? ?? '';
+      _selectedLocationId = map['current_location_id'] as String?;
+      _skills = map['skills'] != null
+          ? List<String>.from(map['skills'] as List)
+          : [];
+      _availability = map['availability'] != null
+          ? List<String>.from(map['availability'] as List)
+          : [];
       setState(() {});
     }
   }
@@ -529,13 +571,21 @@ class _MyProfileFormScreenState extends State<_MyProfileFormScreen> {
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
-    _cityController.dispose();
     _notesController.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_selectedLocation == null && _selectedLocationId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: const Text('اختر موقعاً من القائمة'),
+        backgroundColor: AppTheme.warning,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ));
+      return;
+    }
     if (_skills.isEmpty || _availability.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: const Text('Select at least one skill and availability'),
@@ -550,12 +600,15 @@ class _MyProfileFormScreenState extends State<_MyProfileFormScreen> {
       await _profileService.upsertProfile(
         fullName: _nameController.text.trim(),
         phone: _phoneController.text.trim(),
-        city: _cityController.text.trim(),
+        city: _selectedLocation?.displayName ?? '',
         skills: _skills,
         availability: _availability,
         notes: _notesController.text.trim().isEmpty
             ? null
             : _notesController.text.trim(),
+        currentLocationId: _selectedLocation?.id ?? _selectedLocationId,
+        latitude: _selectedLocation?.latitude,
+        longitude: _selectedLocation?.longitude,
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -624,12 +677,14 @@ class _MyProfileFormScreenState extends State<_MyProfileFormScreen> {
                         v == null || v.trim().isEmpty ? 'Required' : null,
                   ),
                   const SizedBox(height: 16),
-                  _ModernTextField(
-                    controller: _cityController,
-                    label: 'City',
-                    icon: Icons.location_city,
-                    validator: (v) =>
-                        v == null || v.trim().isEmpty ? 'Required' : null,
+                  LocationPicker(
+                    selectedId: _selectedLocation?.id ?? _selectedLocationId,
+                    label: 'الموقع',
+                    hint: 'اختر مدينتك',
+                    onChanged: (loc) => setState(() {
+                      _selectedLocation = loc;
+                      _selectedLocationId = loc?.id;
+                    }),
                   ),
                 ],
               ),

@@ -22,9 +22,14 @@ const List<ModernBottomNavItem> kCoordinatorShellNavItems = [
     label: 'المهام',
   ),
   ModernBottomNavItem(
+    icon: Icons.chat_bubble_outline,
+    activeIcon: Icons.chat_bubble,
+    label: 'المحادثات',
+  ),
+  ModernBottomNavItem(
     icon: Icons.notifications_outlined,
     activeIcon: Icons.notifications,
-    label: 'التنبيهات',
+    label: 'الإشعارات',
   ),
   ModernBottomNavItem(
     icon: Icons.settings_outlined,

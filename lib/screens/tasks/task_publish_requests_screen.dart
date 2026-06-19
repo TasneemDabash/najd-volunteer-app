@@ -6,7 +6,46 @@ import '../../l10n/app_strings.dart';
 import '../../models/task_publish_request.dart';
 import '../../services/task_publish_request_service.dart';
 import '../../widgets/skill_chip.dart';
-import 'task_details_screen.dart';
+
+/// Dialog with its own controller lifecycle (avoids Flutter dispose crash).
+class _RejectReasonDialog extends StatefulWidget {
+  @override
+  State<_RejectReasonDialog> createState() => _RejectReasonDialogState();
+}
+
+class _RejectReasonDialogState extends State<_RejectReasonDialog> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text(AppStrings.reject),
+      content: TextField(
+        controller: _controller,
+        decoration: const InputDecoration(
+          labelText: AppStrings.rejectionReason,
+        ),
+        maxLines: 3,
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text(AppStrings.cancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, _controller.text.trim()),
+          child: const Text(AppStrings.reject),
+        ),
+      ],
+    );
+  }
+}
 
 /// Admin/support screen to review volunteer task publish requests.
 class TaskPublishRequestsScreen extends StatefulWidget {
@@ -41,81 +80,52 @@ class _TaskPublishRequestsScreenState extends State<TaskPublishRequestsScreen> {
 
   Future<void> _approve(TaskPublishRequest req) async {
     try {
-      final taskId = await _service.approveRequest(req.id);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppStrings.requestApproved),
-            backgroundColor: AppTheme.success,
-          ),
-        );
-        if (taskId != null) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => TaskDetailsScreen(taskId: taskId),
-            ),
-          );
-        }
-        _load();
-      }
+      await _service.approveRequest(req.id);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppStrings.requestApproved),
+          backgroundColor: AppTheme.success,
+        ),
+      );
+      await _load();
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${AppStrings.errorPrefix} $e'),
-            backgroundColor: AppTheme.error,
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${AppStrings.errorPrefix} $e\n\nنفّذ supabase/fix_publish_approve_notify_delete_account.sql في Supabase.',
           ),
-        );
-      }
+          backgroundColor: AppTheme.error,
+          duration: const Duration(seconds: 8),
+        ),
+      );
     }
   }
 
   Future<void> _reject(TaskPublishRequest req) async {
-    final reasonController = TextEditingController();
     final reason = await showDialog<String>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text(AppStrings.reject),
-        content: TextField(
-          controller: reasonController,
-          decoration: const InputDecoration(
-            labelText: AppStrings.rejectionReason,
-          ),
-          maxLines: 3,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text(AppStrings.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, reasonController.text.trim()),
-            child: const Text(AppStrings.reject),
-          ),
-        ],
-      ),
+      builder: (ctx) => _RejectReasonDialog(),
     );
-    reasonController.dispose();
-    if (reason == null) return;
+    if (reason == null || !mounted) return;
 
     try {
-      await _service.rejectRequest(req.id, reason: reason.isEmpty ? null : reason);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppStrings.requestRejected)),
-        );
-        _load();
-      }
+      await _service.rejectRequest(req.id,
+          reason: reason.isEmpty ? null : reason);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppStrings.requestRejected)),
+      );
+      await _load();
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${AppStrings.errorPrefix} $e'),
-            backgroundColor: AppTheme.error,
-          ),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${AppStrings.errorPrefix} $e'),
+          backgroundColor: AppTheme.error,
+        ),
+      );
     }
   }
 

@@ -118,11 +118,11 @@ class AuthProvider with ChangeNotifier {
       return 'لم يتم العثور على حساب بهذا البريد الإلكتروني.';
     }
 
-    // Email already exists
+    // Email already exists (auth only — not generic Postgres duplicate-key errors)
     if (errorStr.contains('already registered') ||
-        errorStr.contains('already exists') ||
-        errorStr.contains('duplicate')) {
-      return 'هذا البريد الإلكتروني مسجل مسبقاً.';
+        errorStr.contains('user_already_exists') ||
+        errorStr.contains('email address is already registered')) {
+      return 'هذا البريد الإلكتروني مسجل مسبقاً. جرّب تسجيل الدخول أو «نسيت كلمة المرور».';
     }
 
     // Too many requests
@@ -196,20 +196,42 @@ class AuthProvider with ChangeNotifier {
     String? fullName,
     String? phone,
     String? city,
+    String? currentLocationId,
+    double? latitude,
+    double? longitude,
   }) async {
     _error = null;
     _isLoading = true;
     notifyListeners();
     try {
-      await _authService.signUp(email: email, password: password);
-      _setUser(_authService.currentUser);
-      // Create profile with provided info
-      _profile = await _accountService.getOrCreateProfile(
-        email: email,
-        fullName: fullName,
-        phone: phone,
-        city: city,
-      );
+      final response = await _authService.signUp(email: email, password: password);
+      _setUser(response.user ?? _authService.currentUser);
+      if (_user == null) {
+        _error =
+            'تم إنشاء الطلب. إذا كان تأكيد البريد مفعّلاً في Supabase، افتح رابط التأكيد ثم سجّل الدخول.';
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+      // Create profile with provided info (profile row may already exist from a DB trigger)
+      try {
+        _profile = await _accountService.getOrCreateProfile(
+          email: email,
+          fullName: fullName,
+          phone: phone,
+          city: city,
+          currentLocationId: currentLocationId,
+          latitude: latitude,
+          longitude: longitude,
+        );
+      } on PostgrestException catch (e) {
+        if (e.code == '23505') {
+          _profile = await _accountService.getProfile();
+          if (_profile == null) rethrow;
+        } else {
+          rethrow;
+        }
+      }
       _isLoading = false;
       notifyListeners();
       return true;
@@ -254,6 +276,27 @@ class AuthProvider with ChangeNotifier {
     _setUser(null);
     _error = null;
     notifyListeners();
+  }
+
+  /// Permanently deletes account and signs out (required for iOS App Store).
+  Future<bool> deleteAccount() async {
+    _error = null;
+    _isLoading = true;
+    notifyListeners();
+    try {
+      await _accountService.deleteOwnAccount();
+      await _authService.signOut();
+      _setUser(null);
+      _profile = null;
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = _formatError(e);
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
   }
 
   void clearError() {

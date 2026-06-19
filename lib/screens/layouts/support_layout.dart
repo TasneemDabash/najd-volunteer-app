@@ -5,6 +5,7 @@ import '../../widgets/modern_bottom_nav.dart';
 import '../dashboard_screen.dart';
 import '../notifications_screen.dart';
 import '../settings_screen.dart';
+import '../support_inbox_screen.dart';
 import '../tasks/task_list_screen.dart';
 import '../volunteers/volunteer_list_screen.dart';
 import 'coordinator_shell_tabs.dart';
@@ -54,7 +55,11 @@ class _SupportLayoutState extends State<SupportLayout> {
             ),
             _volunteersPage,
             _tasksPage,
-            const NotificationsScreen(key: ValueKey('tab_alerts')),
+            const SupportInboxScreen(key: ValueKey('tab_messages')),
+            NotificationsScreen(
+              key: const ValueKey('tab_notifications'),
+              onSwitchTab: _switchTab,
+            ),
             const SettingsScreen(key: ValueKey('tab_settings')),
           ],
         ),

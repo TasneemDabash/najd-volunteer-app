@@ -300,23 +300,49 @@ class _TemplateEditorSheetState extends State<_TemplateEditorSheet> {
                       ? null
                       : () async {
                           if (!_formKey.currentState!.validate()) return;
-                          if (_skills.isEmpty) return;
+                          if (_skills.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(AppStrings.pickSkillError),
+                                backgroundColor: AppTheme.error,
+                              ),
+                            );
+                            return;
+                          }
                           setState(() => _saving = true);
-                          final base = widget.template;
-                          final t = TaskTemplate(
-                            id: base?.id ?? '',
-                            title: _title.text.trim(),
-                            description: _description.text.trim(),
-                            requiredSkills: List.from(_skills),
-                            kind: _kind,
-                            usageCount: base?.usageCount ?? 0,
-                            sortOrder: base?.sortOrder ?? 0,
-                            isActive: base?.isActive ?? true,
-                            createdAt: base?.createdAt ?? DateTime.now(),
-                          );
-                          await widget.onSave(t);
-                          if (context.mounted) {
-                            Navigator.pop(context, true);
+                          try {
+                            final base = widget.template;
+                            final t = TaskTemplate(
+                              id: base?.id ?? '',
+                              title: _title.text.trim(),
+                              description: _description.text.trim(),
+                              requiredSkills: List.from(_skills),
+                              kind: _kind,
+                              usageCount: base?.usageCount ?? 0,
+                              sortOrder: base?.sortOrder ?? 0,
+                              isActive: base?.isActive ?? true,
+                              createdAt: base?.createdAt ?? DateTime.now(),
+                            );
+                            await widget.onSave(t);
+                            if (context.mounted) {
+                              Navigator.pop(context, true);
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              final msg = e.toString();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    msg.contains('task_templates')
+                                        ? '$msg\n\nنفّذ supabase/task_templates_and_publish_requests.sql في Supabase SQL Editor.'
+                                        : msg,
+                                  ),
+                                  backgroundColor: AppTheme.error,
+                                  duration: const Duration(seconds: 8),
+                                ),
+                              );
+                              setState(() => _saving = false);
+                            }
                           }
                         },
                   child: Text(_saving ? '...' : AppStrings.save),

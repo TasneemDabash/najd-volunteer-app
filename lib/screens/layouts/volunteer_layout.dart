@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 import '../../config/theme.dart';
+import '../../services/notification_service.dart';
 import '../../services/task_service.dart';
 import '../../widgets/animations.dart';
 import '../../widgets/app_card.dart';
@@ -97,10 +98,12 @@ class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _rotationController;
   final TaskService _taskService = TaskService();
+  final NotificationService _notificationService = NotificationService();
 
   int _completedTasks = 0;
   int _pendingTasks = 0;
   int _totalHours = 0;
+  int _unreadNotifications = 0;
   bool _loadingStats = true;
 
   final List<String> _quotes = [
@@ -126,11 +129,13 @@ class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
       final completed = await _taskService.getMyCompletedTasksCount();
       final pending = await _taskService.getMyPendingTasksCount();
       final hours = await _taskService.getMyTotalHours();
+      final unread = await _notificationService.getUnreadCount();
       if (mounted) {
         setState(() {
           _completedTasks = completed;
           _pendingTasks = pending;
           _totalHours = hours;
+          _unreadNotifications = unread;
           _loadingStats = false;
         });
       }
@@ -216,22 +221,35 @@ class _VolunteerHomeScreenState extends State<_VolunteerHomeScreen>
                             context,
                             MaterialPageRoute(
                                 builder: (_) => const NotificationsScreen()),
-                          ),
+                          ).then((_) => _loadStats()),
                         ),
-                        Positioned(
-                          right: 8,
-                          top: 8,
-                          child: PulseAnimation(
+                        if (_unreadNotifications > 0)
+                          Positioned(
+                            right: 6,
+                            top: 6,
                             child: Container(
-                              width: 10,
-                              height: 10,
-                              decoration: const BoxDecoration(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 5,
+                                vertical: 2,
+                              ),
+                              constraints: const BoxConstraints(minWidth: 18),
+                              decoration: BoxDecoration(
                                 color: AppTheme.error,
-                                shape: BoxShape.circle,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                _unreadNotifications > 99
+                                    ? '99+'
+                                    : '$_unreadNotifications',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
-                        ),
                       ],
                     ),
                     const SizedBox(width: 8),

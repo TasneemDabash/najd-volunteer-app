@@ -26,6 +26,9 @@ class AccountService {
     String? fullName,
     String? phone,
     String? city,
+    String? currentLocationId,
+    double? latitude,
+    double? longitude,
   }) async {
     final userId = currentUserId;
     if (userId == null) {
@@ -49,11 +52,22 @@ class AccountService {
       'status': 'active',
       'created_at': now,
       'updated_at': now,
+      if (currentLocationId != null) 'current_location_id': currentLocationId,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
     };
 
-    final response =
-        await _client.from(_profilesTable).insert(data).select().single();
-    return UserProfile.fromJson(response);
+    try {
+      final response =
+          await _client.from(_profilesTable).insert(data).select().single();
+      return UserProfile.fromJson(response);
+    } on PostgrestException catch (e) {
+      if (e.code == '23505') {
+        final again = await getProfile();
+        if (again != null) return again;
+      }
+      rethrow;
+    }
   }
 
   Future<UserProfile> updateRole({
@@ -174,5 +188,10 @@ class AccountService {
       }
     } catch (_) {}
     return updateStatus(userId: userId, status: status);
+  }
+
+  /// Permanently deletes the signed-in user's account (App Store / Play requirement).
+  Future<void> deleteOwnAccount() async {
+    await _client.rpc('delete_own_account');
   }
 }
