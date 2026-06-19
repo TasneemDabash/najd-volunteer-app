@@ -83,4 +83,14 @@ abstract final class AppStrings {
   static const statusPending = 'قيد الانتظار';
   static const statusApproved = 'مقبول';
   static const statusRejected = 'مرفوض';
+
+  // Delete task
+  static const deleteTask = 'حذف المهمة';
+  static const deleteTaskConfirm = 'هل أنت متأكد من حذف هذه المهمة؟ لا يمكن التراجع عن هذا الإجراء.';
+  static const taskDeleted = 'تم حذف المهمة';
+
+  // Open tasks
+  static const openToAll = 'مفتوحة للجميع';
+  static const openTasks = 'المهام المفتوحة';
+  static const noOpenTasks = 'لا توجد مهام مفتوحة حالياً.';
 }

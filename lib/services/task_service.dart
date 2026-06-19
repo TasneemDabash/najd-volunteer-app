@@ -370,6 +370,36 @@ class TaskService {
     return completed * 2;
   }
 
+  /// Get tasks that have no volunteers assigned (open to all volunteers).
+  /// These are pending/active tasks where task_assignments is empty.
+  Future<List<TaskModel>> getOpenTasks() async {
+    try {
+      // Get all non-completed tasks
+      final tasks = await getTasks();
+      final nonCompleted = tasks
+          .where((t) => t.status != TaskStatus.completed)
+          .toList();
+
+      if (nonCompleted.isEmpty) return [];
+
+      // Get task IDs that have assignments
+      final assignedTaskIds = <String>{};
+      final assignments = await _client
+          .from(_assignmentsTable)
+          .select('task_id');
+      for (final a in (assignments as List)) {
+        assignedTaskIds.add((a as Map)['task_id'] as String);
+      }
+
+      // Return tasks that have no assignments
+      return nonCompleted
+          .where((t) => !assignedTaskIds.contains(t.id))
+          .toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
   /// Tasks currently assigned to the signed-in volunteer. Uses the
   /// `list_my_assigned_tasks` RPC (joins location for display). Falls back to a
   /// direct join in case the RPC is missing.

@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -5,12 +6,14 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'config/app_config.dart';
 import 'config/theme.dart';
+import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/signup_screen.dart';
 import 'screens/role_based_root.dart';
 import 'widgets/incoming_call_listener.dart';
+import 'services/push_notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +22,15 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
+  // Initialize Firebase first
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('Firebase init failed: $e');
+  }
+
   try {
     await Supabase.initialize(
       url: AppConfig.supabaseUrl,
@@ -26,6 +38,13 @@ void main() async {
     );
   } catch (_) {
     // Supabase not configured yet – app will show login; API calls will fail until configured
+  }
+
+  // Initialize push notifications (wrapped in try-catch to prevent crash)
+  try {
+    await PushNotificationService().initialize();
+  } catch (e) {
+    debugPrint('Push notification init failed: $e');
   }
 
   runApp(const NajdVolunteerApp());

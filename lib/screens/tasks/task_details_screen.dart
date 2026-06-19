@@ -66,6 +66,44 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
     }
   }
 
+  Future<void> _deleteTask() async {
+    if (_task == null) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text(AppStrings.deleteTask),
+        content: const Text(AppStrings.deleteTaskConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text(AppStrings.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.error),
+            child: const Text(AppStrings.delete),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      await _service.deleteTask(_task!.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(AppStrings.taskDeleted),
+            backgroundColor: AppTheme.success,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) _showError(e);
+    }
+  }
+
   Future<void> _openAssignSheet({required UserRole role}) async {
     if (_task == null) return;
     final originLat = _task!.latitude;
@@ -372,6 +410,13 @@ class _TaskDetailsScreenState extends State<TaskDetailsScreen> {
                     ),
                   ),
               ],
+            ),
+          if (isCoordinator && task.status == TaskStatus.completed)
+            IconButton(
+              onPressed: _deleteTask,
+              icon: const Icon(Icons.delete_outline_rounded),
+              tooltip: AppStrings.deleteTask,
+              color: AppTheme.error,
             ),
         ],
       ),

@@ -24,7 +24,9 @@ class VolunteerTasksScreen extends StatefulWidget {
 
 class _VolunteerTasksScreenState extends State<VolunteerTasksScreen> {
   final TaskService _service = TaskService();
-  List<TaskModel> _tasks = [];
+  List<TaskModel> _assignedTasks = [];
+  List<TaskModel> _openTasks = [];
+  Set<String> _openTaskIds = {};
   TaskStatus? _filter;
   bool _loading = true;
   String? _error;
@@ -41,10 +43,13 @@ class _VolunteerTasksScreenState extends State<VolunteerTasksScreen> {
       _error = null;
     });
     try {
-      final list = await _service.getMyAssignedTasks();
+      final assigned = await _service.getMyAssignedTasks();
+      final open = await _service.getOpenTasks();
       if (!mounted) return;
       setState(() {
-        _tasks = list;
+        _assignedTasks = assigned;
+        _openTasks = open;
+        _openTaskIds = open.map((t) => t.id).toSet();
         _loading = false;
       });
     } catch (e) {
@@ -54,6 +59,19 @@ class _VolunteerTasksScreenState extends State<VolunteerTasksScreen> {
         _loading = false;
       });
     }
+  }
+
+  List<TaskModel> get _tasks {
+    // Combine assigned and open tasks, removing duplicates
+    final combined = <String, TaskModel>{};
+    for (final t in _assignedTasks) {
+      combined[t.id] = t;
+    }
+    for (final t in _openTasks) {
+      combined[t.id] = t;
+    }
+    return combined.values.toList()
+      ..sort((a, b) => b.date.compareTo(a.date));
   }
 
   Color _statusColor(TaskStatus s) {
@@ -130,11 +148,13 @@ class _VolunteerTasksScreenState extends State<VolunteerTasksScreen> {
                               itemCount: _visibleTasks.length,
                               itemBuilder: (context, index) {
                                 final t = _visibleTasks[index];
+                                final isOpen = _openTaskIds.contains(t.id);
                                 return SlideInAnimation(
                                   delay: Duration(milliseconds: index * 40),
                                   child: _MyTaskCard(
                                     task: t,
                                     statusColor: _statusColor(t.status),
+                                    isOpenToAll: isOpen,
                                     onTap: () => Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -160,11 +180,13 @@ class _MyTaskCard extends StatelessWidget {
     required this.task,
     required this.statusColor,
     required this.onTap,
+    this.isOpenToAll = false,
   });
 
   final TaskModel task;
   final Color statusColor;
   final VoidCallback onTap;
+  final bool isOpenToAll;
 
   @override
   Widget build(BuildContext context) {
@@ -216,6 +238,33 @@ class _MyTaskCard extends StatelessWidget {
                     ),
                   ],
                 ),
+                if (isOpenToAll) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primary.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(Icons.public_rounded,
+                            size: 14, color: AppTheme.primary),
+                        SizedBox(width: 4),
+                        Text(
+                          AppStrings.openToAll,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 if (task.description.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Text(
@@ -320,7 +369,7 @@ class _EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final msg = filter == null
-        ? 'لا توجد مهام معيّنة لك بعد.\nتحقق لاحقاً أو تواصل مع الدعم.'
+        ? 'لا توجد مهام معيّنة لك أو مفتوحة للجميع.\nتحقق لاحقاً أو تواصل مع الدعم.'
         : 'لا توجد مهام ${filter!.displayName} حالياً.';
     return Center(
       child: Padding(

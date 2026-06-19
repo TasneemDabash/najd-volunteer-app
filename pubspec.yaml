@@ -21,6 +21,9 @@ dependencies:
   just_audio: ^0.9.40
   path_provider: ^2.1.4
   permission_handler: ^11.3.1
+  # Push notifications
+  firebase_core: ^3.8.1
+  firebase_messaging: ^15.2.1
 
 dev_dependencies:
   flutter_test:
@@ -29,10 +32,18 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.3
 
 flutter_launcher_icons:
-  ios: true
+  ios: false
   android: true
-  image_path: "assets/icon/app_icon.png"
+  image_path: "assets/icon/App_icon.png"
   remove_alpha_ios: true
+  web:
+    generate: true
+    image_path: "assets/icon/App_icon.png"
+    background_color: "#ffffff"
+    theme_color: "#2196F3"
+  macos:
+    generate: true
+    image_path: "assets/icon/App_icon.png"
 
 # `record` 5.1.2 pins `record_linux: ^0.7.2`, which doesn't implement the
 # `startStream` method added in `record_platform_interface` 1.4.0+. Even though

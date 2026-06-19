@@ -5,6 +5,7 @@ import '../models/user_profile.dart';
 import '../models/user_role.dart';
 import '../services/account_service.dart';
 import '../services/auth_service.dart';
+import '../services/push_notification_service.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -174,6 +175,12 @@ class AuthProvider with ChangeNotifier {
       await _authService.signIn(email: email, password: password);
       _setUser(_authService.currentUser);
       await _loadProfile();
+      // Register device for push notifications (don't block login on failure)
+      try {
+        await PushNotificationService().onUserLogin();
+      } catch (e) {
+        debugPrint('Error registering device token: $e');
+      }
       _isLoading = false;
       notifyListeners();
       return true;
@@ -232,6 +239,12 @@ class AuthProvider with ChangeNotifier {
           rethrow;
         }
       }
+      // Register device for push notifications (don't block signup on failure)
+      try {
+        await PushNotificationService().onUserLogin();
+      } catch (e) {
+        debugPrint('Error registering device token: $e');
+      }
       _isLoading = false;
       notifyListeners();
       return true;
@@ -272,6 +285,12 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> signOut() async {
+    // Remove device token before signing out (don't block logout on failure)
+    try {
+      await PushNotificationService().onUserLogout();
+    } catch (e) {
+      debugPrint('Error removing device token: $e');
+    }
     await _authService.signOut();
     _setUser(null);
     _error = null;
