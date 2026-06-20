@@ -17,6 +17,7 @@ import '../../providers/auth_provider.dart';
 import '../../services/task_service.dart';
 import '../../widgets/animations.dart';
 import 'create_task_screen.dart';
+import 'task_analytics_screen.dart';
 import 'task_details_screen.dart';
 import 'task_publish_requests_screen.dart';
 import 'task_templates_screen.dart';
@@ -380,6 +381,15 @@ class _TaskListScreenState extends State<TaskListScreen> {
             ),
             tooltip: 'تصفية متقدمة',
           ),
+          // Analytics button
+          IconButton(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const TaskAnalyticsScreen()),
+            ),
+            icon: const Icon(Icons.analytics_outlined),
+            tooltip: 'تحليل المهام',
+          ),
           // Export button
           IconButton(
             onPressed: _showExportOptions,
@@ -390,9 +400,14 @@ class _TaskListScreenState extends State<TaskListScreen> {
             PopupMenuButton<String>(
               icon: const Icon(Icons.more_vert_rounded),
               onSelected: (v) {
-                final page = v == 'templates'
-                    ? const TaskTemplatesScreen()
-                    : const TaskPublishRequestsScreen();
+                Widget page;
+                if (v == 'templates') {
+                  page = const TaskTemplatesScreen();
+                } else if (v == 'requests') {
+                  page = const TaskPublishRequestsScreen();
+                } else {
+                  return;
+                }
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => page),

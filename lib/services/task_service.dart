@@ -427,4 +427,110 @@ class TaskService {
           .toList();
     }
   }
+
+  // ============ Analytics Methods ============
+
+  /// Get task analytics data
+  Future<TaskAnalytics> getTaskAnalytics() async {
+    final allTasks = await getTasks();
+
+    // Calculate overall stats
+    final total = allTasks.length;
+    final completed = allTasks.where((t) => t.status == TaskStatus.completed).length;
+    final active = allTasks.where((t) => t.status == TaskStatus.active).length;
+    final pending = allTasks.where((t) => t.status == TaskStatus.pending).length;
+
+    // Calculate skill-based stats
+    final skillStats = <String, SkillStats>{};
+    final skills = ['طبي', 'لوجستي', 'قيادة', 'ترجمة', 'إعلام', 'تقني', 'مساعدة عامة'];
+
+    for (final skill in skills) {
+      final skillTasks = allTasks.where((t) => t.requiredSkills.contains(skill)).toList();
+      final skillCompleted = skillTasks.where((t) => t.status == TaskStatus.completed).length;
+      skillStats[skill] = SkillStats(
+        total: skillTasks.length,
+        completed: skillCompleted,
+        successRate: skillTasks.isEmpty ? 0 : (skillCompleted / skillTasks.length * 100),
+      );
+    }
+
+    // Get last 10 tasks (sorted by date)
+    final sortedTasks = List<TaskModel>.from(allTasks)
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final recentTasks = sortedTasks.take(10).toList();
+
+    // Calculate monthly trends (last 6 months)
+    final now = DateTime.now();
+    final monthlyStats = <String, MonthlyStats>{};
+    for (var i = 0; i < 6; i++) {
+      final month = DateTime(now.year, now.month - i, 1);
+      final monthEnd = DateTime(now.year, now.month - i + 1, 0);
+      final monthTasks = allTasks.where((t) =>
+        t.createdAt.isAfter(month.subtract(const Duration(days: 1))) &&
+        t.createdAt.isBefore(monthEnd.add(const Duration(days: 1)))
+      ).toList();
+      final monthCompleted = monthTasks.where((t) => t.status == TaskStatus.completed).length;
+      final monthKey = '${month.year}-${month.month.toString().padLeft(2, '0')}';
+      monthlyStats[monthKey] = MonthlyStats(
+        total: monthTasks.length,
+        completed: monthCompleted,
+      );
+    }
+
+    return TaskAnalytics(
+      totalTasks: total,
+      completedTasks: completed,
+      activeTasks: active,
+      pendingTasks: pending,
+      overallSuccessRate: total == 0 ? 0 : (completed / total * 100),
+      skillStats: skillStats,
+      recentTasks: recentTasks,
+      monthlyStats: monthlyStats,
+    );
+  }
+}
+
+/// Analytics data model
+class TaskAnalytics {
+  final int totalTasks;
+  final int completedTasks;
+  final int activeTasks;
+  final int pendingTasks;
+  final double overallSuccessRate;
+  final Map<String, SkillStats> skillStats;
+  final List<TaskModel> recentTasks;
+  final Map<String, MonthlyStats> monthlyStats;
+
+  TaskAnalytics({
+    required this.totalTasks,
+    required this.completedTasks,
+    required this.activeTasks,
+    required this.pendingTasks,
+    required this.overallSuccessRate,
+    required this.skillStats,
+    required this.recentTasks,
+    required this.monthlyStats,
+  });
+}
+
+class SkillStats {
+  final int total;
+  final int completed;
+  final double successRate;
+
+  SkillStats({
+    required this.total,
+    required this.completed,
+    required this.successRate,
+  });
+}
+
+class MonthlyStats {
+  final int total;
+  final int completed;
+
+  MonthlyStats({
+    required this.total,
+    required this.completed,
+  });
 }
