@@ -10,9 +10,5 @@
 	<true/>
 	<key>com.apple.security.network.client</key>
 	<true/>
-	<key>com.apple.application-identifier</key>
-	<string>$(AppIdentifierPrefix)$(CFBundleIdentifier)</string>
-	<key>aps-environment</key>
-	<string>development</string>
 </dict>
 </plist>
