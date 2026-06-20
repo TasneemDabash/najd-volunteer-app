@@ -32,6 +32,23 @@
   <title>najd</title>
   <link rel="manifest" href="manifest.json">
 
+  <!-- Firebase SDK for Web Push Notifications -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAqps1uA_5G1_xSIKuhhrsTiJ-1l7H5z9E",
+      authDomain: "najd-8f19d.firebaseapp.com",
+      projectId: "najd-8f19d",
+      storageBucket: "najd-8f19d.firebasestorage.app",
+      messagingSenderId: "983485775721",
+      appId: "1:983485775721:web:a2c7f8najd8f19d"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+  </script>
+
   <script>
     // The value below is injected by flutter build, do not touch.
     const serviceWorkerVersion = null;
