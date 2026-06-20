@@ -42,11 +42,11 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Firebase configuration files (contain API keys)
-android/app/google-services.json
-ios/Runner/GoogleService-Info.plist
-macos/Runner/GoogleService-Info.plist
-# lib/firebase_options.dart - needed for build, API keys are public anyway
+# Firebase configuration files - needed for CI builds (API keys are public client-side keys)
+# android/app/google-services.json
+# ios/Runner/GoogleService-Info.plist
+# macos/Runner/GoogleService-Info.plist
+# lib/firebase_options.dart
 
 # Node modules (for Supabase functions)
 node_modules/

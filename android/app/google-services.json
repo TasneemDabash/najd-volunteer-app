@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "983485775721",
+    "project_id": "najd-8f19d",
+    "storage_bucket": "najd-8f19d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:983485775721:android:8317a3cceb3d5908a2c7f8",
+        "android_client_info": {
+          "package_name": "com.Najd.myapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqps1uA_5G1_xSIKuhhrsTiJ-1l7H5z9E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
